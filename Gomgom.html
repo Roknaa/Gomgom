@@ -1,0 +1,1789 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#0a0e1a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>جمجم — لعبة الأذكياء | by Famo</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#0a0e1a;--surface:rgba(255,255,255,.045);--surface2:rgba(255,255,255,.09);
+  --border:rgba(255,255,255,.1);--border2:rgba(255,255,255,.18);
+  --text:#e8eefb;--dim:#8fa0bd;
+  --ok:#22c55e;--bad:#ef4444;--warn:#fbbf24;
+  --math:#38bdf8;--culture:#fbbf24;--art:#f472b6;--science:#34d399;--football:#a3e635;--mixed:#a855f7;
+  --accent:var(--mixed);
+  --safe-t:max(12px,env(safe-area-inset-top));--safe-b:max(12px,env(safe-area-inset-bottom));
+}
+html,body{height:100%;overflow-x:hidden}
+body{
+  font-family:"Segoe UI",Tahoma,"Noto Sans Arabic",system-ui,-apple-system,sans-serif;
+  background:var(--bg);color:var(--text);line-height:1.55;min-height:100dvh;
+  padding:var(--safe-t) 14px var(--safe-b);display:flex;justify-content:center;
+  font-size:15px;
+}
+body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(circle at 12% 8%,rgba(168,85,247,.18),transparent 40%),
+    radial-gradient(circle at 88% 92%,rgba(56,189,248,.15),transparent 40%),
+    radial-gradient(circle at 50% 50%,rgba(163,230,53,.06),transparent 55%);
+}
+.app{position:relative;z-index:1;width:100%;max-width:760px}
+.screen{display:none}
+.screen.active{display:block;animation:fadeIn .32s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+
+/* ========== SPLASH ========== */
+#scr-splash .splash{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  min-height:calc(100dvh - var(--safe-t) - var(--safe-b));
+  text-align:center;padding:20px;position:relative;overflow:hidden;
+}
+#scr-splash .splash::before{
+  content:"";position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--accent),transparent);
+  animation:scanLine 3s ease-in-out infinite;box-shadow:0 0 20px var(--accent);
+}
+@keyframes scanLine{0%{top:0;opacity:0}20%{opacity:1}50%{top:100%;opacity:1}100%{top:100%;opacity:0}}
+
+.splash-particles{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:0}
+.particle{position:absolute;width:4px;height:4px;border-radius:50%;opacity:0;
+  animation:particleFloat 8s ease-in-out infinite}
+@keyframes particleFloat{
+  0%{opacity:0;transform:translateY(100%) scale(.5)}
+  20%{opacity:.9}
+  80%{opacity:.9}
+  100%{opacity:0;transform:translateY(-100dvh) scale(1.2)}
+}
+
+.splash-logo{
+  width:140px;height:140px;border-radius:36px;overflow:hidden;position:relative;z-index:1;
+  background:linear-gradient(135deg,rgba(168,85,247,.3),rgba(56,189,248,.3));
+  border:2px solid var(--border2);display:grid;place-items:center;cursor:pointer;
+  animation:logoEntrance 1s cubic-bezier(.2,1.2,.4,1) both, glowPulse 3s ease-in-out infinite 1s;
+  transition:transform .2s;
+}
+.splash-logo:active{transform:scale(.92)}
+.splash-logo img{width:100%;height:100%;object-fit:cover;border-radius:34px}
+.splash-logo .fb{font-size:58px;font-weight:900;
+  background:linear-gradient(135deg,#a855f7,#38bdf8);-webkit-background-clip:text;background-clip:text;color:transparent}
+@keyframes logoEntrance{from{transform:scale(0) rotate(-180deg);opacity:0}to{transform:scale(1) rotate(0);opacity:1}}
+@keyframes glowPulse{
+  0%,100%{box-shadow:0 0 60px rgba(168,85,247,.6),0 0 120px rgba(56,189,248,.3)}
+  50%{box-shadow:0 0 90px rgba(168,85,247,.9),0 0 170px rgba(56,189,248,.5)}
+}
+
+.splash-title{
+  font-size:clamp(52px,16vw,80px);font-weight:900;margin:24px 0 6px;
+  background:linear-gradient(135deg,#fff,#c9a7ff 45%,#7dd3fc);
+  background-size:200% 200%;
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  letter-spacing:2px;position:relative;z-index:1;
+  animation:titleSlide .9s cubic-bezier(.2,1.2,.4,1) .4s both, gradientShift 4s ease infinite 1.5s;
+}
+@keyframes titleSlide{
+  from{transform:translateY(30px);opacity:0;letter-spacing:30px;filter:blur(10px)}
+  to{transform:none;opacity:1;letter-spacing:2px;filter:blur(0)}
+}
+@keyframes gradientShift{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+
+.splash-tagline{font-size:15px;color:var(--dim);margin-bottom:26px;position:relative;z-index:1;
+  animation:fadeIn 1s ease .8s both}
+
+.splash-welcome{font-size:17px;font-weight:700;color:var(--text);min-height:30px;
+  margin-bottom:18px;position:relative;z-index:1;animation:fadeIn .8s ease 1s both}
+.typewriter::after{content:"|";animation:blink .8s infinite;color:var(--accent);font-weight:400}
+@keyframes blink{0%,50%{opacity:1}51%,100%{opacity:0}}
+
+.splash-input{width:100%;max-width:320px;margin-bottom:18px;position:relative;z-index:1;
+  animation:fadeIn .5s ease 1.2s both}
+.splash-input input{
+  width:100%;padding:14px 18px;background:var(--surface);
+  border:1.5px solid var(--border);border-radius:14px;color:var(--text);
+  font-family:inherit;font-size:15px;font-weight:700;text-align:center;
+  transition:.2s;outline:none;
+}
+.splash-input input:focus{border-color:var(--accent);
+  box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 22%,transparent)}
+
+.btn-enter{
+  padding:15px 42px;font-size:16px;font-weight:800;font-family:inherit;border:0;
+  border-radius:16px;background:linear-gradient(135deg,var(--accent),color-mix(in srgb,var(--accent) 60%,#fff));
+  color:#061020;cursor:pointer;transition:.25s;
+  box-shadow:0 12px 40px -8px var(--accent);
+  display:inline-flex;align-items:center;gap:10px;
+  position:relative;z-index:1;
+  animation:fadeIn .5s ease 1.4s both, btnBounce 2s ease-in-out 2s infinite;
+}
+.btn-enter:hover{transform:translateY(-3px) scale(1.02);box-shadow:0 18px 50px -8px var(--accent)}
+.btn-enter:active{transform:scale(.97)}
+.btn-enter.loading{pointer-events:none;opacity:.9}
+.btn-enter.loading::after{content:"";width:16px;height:16px;
+  border:2px solid #061020;border-top-color:transparent;border-radius:50%;
+  animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes btnBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+
+.splash-dev{
+  position:absolute;bottom:24px;left:0;right:0;text-align:center;
+  font-size:12px;color:var(--dim);z-index:1;
+  animation:fadeIn 1s ease 1.8s both;
+}
+.splash-dev b{color:var(--accent);font-weight:900}
+.splash-dev .heart{color:#ef4444;animation:heartBeat 1.2s ease-in-out infinite;display:inline-block;margin:0 3px}
+@keyframes heartBeat{0%,100%{transform:scale(1)}30%{transform:scale(1.3)}60%{transform:scale(1)}}
+
+.splash-out{animation:splashOut .55s cubic-bezier(.5,0,.8,1) forwards}
+@keyframes splashOut{to{opacity:0;transform:scale(1.4);filter:blur(20px)}}
+
+/* ========== HOME ========== */
+.home-top{display:flex;align-items:center;justify-content:space-between;
+  padding:4px 4px 12px;gap:10px}
+.home-greeting{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--dim);
+  background:var(--surface);border:1px solid var(--border);border-radius:99px;
+  padding:8px 14px;flex:1;min-width:0}
+.home-greeting i.hand{color:var(--accent);font-size:15px}
+.home-greeting b{color:var(--text);font-weight:800;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:120px}
+.edit-btn,.sound-btn{
+  width:30px;height:30px;border-radius:50%;border:0;
+  background:rgba(255,255,255,.06);color:var(--dim);cursor:pointer;
+  display:grid;place-items:center;font-size:12px;transition:.2s;flex-shrink:0;
+  font-family:inherit
+}
+.edit-btn:hover,.sound-btn:hover{background:var(--surface2);color:var(--accent);transform:scale(1.1)}
+.sound-btn{width:42px;height:42px;font-size:16px}
+
+.brand{text-align:center;padding:16px 12px 20px}
+.logo-wrap{width:96px;height:96px;margin:0 auto 14px;border-radius:26px;position:relative;
+  background:linear-gradient(135deg,rgba(168,85,247,.25),rgba(56,189,248,.25));
+  border:2px solid var(--border2);display:grid;place-items:center;overflow:hidden;
+  box-shadow:0 16px 46px rgba(168,85,247,.35);animation:floatY 3.5s ease-in-out infinite;
+  cursor:pointer;transition:transform .2s}
+.logo-wrap:active{transform:scale(.94)}
+.logo-wrap img{width:100%;height:100%;object-fit:cover;border-radius:24px}
+.logo-fallback{font-size:40px;font-weight:900;
+  background:linear-gradient(135deg,#a855f7,#38bdf8);-webkit-background-clip:text;
+  background-clip:text;color:transparent}
+@keyframes floatY{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.brand h1{font-size:clamp(34px,9vw,46px);font-weight:900;letter-spacing:1px;
+  background:linear-gradient(135deg,#fff,#c9a7ff 45%,#7dd3fc);
+  background-size:200% 200%;-webkit-background-clip:text;background-clip:text;color:transparent;
+  line-height:1.1;animation:gradientShift 5s ease infinite}
+.brand p{color:var(--dim);font-size:13.5px;margin-top:6px}
+
+.home-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:16px 0}
+.hs-item{background:var(--surface);border:1px solid var(--border);border-radius:14px;
+  padding:12px 6px;text-align:center;transition:.2s}
+.hs-item:hover{background:var(--surface2);transform:translateY(-2px)}
+.hs-item i{font-size:18px;color:var(--accent);margin-bottom:4px;display:block}
+.hs-item b{display:block;font-size:16px;font-weight:900;color:var(--text)}
+.hs-item small{font-size:10px;color:var(--dim)}
+
+.section-title{font-size:16px;font-weight:800;margin:20px 4px 12px;color:var(--text);
+  display:flex;align-items:center;gap:8px}
+.section-title i{color:var(--accent);font-size:15px}
+
+.cats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:11px}
+.cat-card{background:var(--surface);border:1px solid var(--border);border-radius:18px;
+  padding:16px 12px;cursor:pointer;transition:.22s;position:relative;overflow:hidden;
+  text-align:center;font-family:inherit;color:inherit}
+.cat-card::before{content:"";position:absolute;inset:0;opacity:0;transition:.3s;
+  background:linear-gradient(135deg,color-mix(in srgb,var(--c) 20%,transparent),transparent)}
+.cat-card:hover::before,.cat-card:active::before{opacity:1}
+.cat-card:hover{transform:translateY(-3px);border-color:var(--c);
+  box-shadow:0 14px 34px -10px var(--c)}
+.cat-icon{font-size:30px;line-height:1;margin-bottom:8px;display:block;color:var(--c);
+  filter:drop-shadow(0 0 12px var(--c));transition:.2s}
+.cat-card:hover .cat-icon{transform:scale(1.15) rotate(-5deg)}
+.cat-name{font-size:14.5px;font-weight:800;position:relative}
+.cat-sub{font-size:11px;color:var(--dim);margin-top:3px;position:relative}
+.cat-prog{margin-top:9px;height:4px;border-radius:99px;background:rgba(255,255,255,.08);
+  overflow:hidden;position:relative}
+.cat-prog i{display:block;height:100%;background:var(--c);border-radius:99px;transition:width .5s}
+
+.modes{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:14px}
+.mode-btn{background:var(--surface);border:1px solid var(--border);border-radius:14px;
+  padding:12px 8px;cursor:pointer;font-family:inherit;color:var(--text);
+  transition:.18s;font-size:12px;font-weight:700;line-height:1.35}
+.mode-btn:hover{background:var(--surface2);border-color:var(--border2);transform:translateY(-2px)}
+.mode-btn .ico{font-size:18px;display:block;margin-bottom:5px;color:var(--accent)}
+.mode-btn:hover .ico{transform:scale(1.15)}
+
+.dev-footer{margin-top:20px;display:flex;align-items:center;justify-content:center;gap:10px;
+  padding:14px 12px;border-top:1px solid var(--border);font-size:12px;color:var(--dim)}
+.dev-avatar{width:34px;height:34px;border-radius:50%;object-fit:cover;
+  border:2px solid var(--accent);
+  box-shadow:0 0 14px color-mix(in srgb,var(--accent) 60%,transparent)}
+.dev-avatar-fb{width:34px;height:34px;border-radius:50%;
+  background:linear-gradient(135deg,#a855f7,#38bdf8);display:grid;place-items:center;
+  font-weight:900;font-size:13px;color:#fff;border:2px solid var(--accent)}
+.dev-footer b{color:var(--accent);font-weight:900;letter-spacing:.5px}
+
+/* ========== TOPBAR ========== */
+.topbar{display:flex;align-items:center;gap:10px;margin-bottom:16px;padding:0 2px}
+.topbar h2{font-size:19px;font-weight:800;flex:1;text-align:center}
+.icon-btn{width:42px;height:42px;flex:0 0 42px;border-radius:12px;
+  border:1px solid var(--border);background:var(--surface);color:var(--text);
+  font-size:16px;cursor:pointer;display:grid;place-items:center;
+  transition:.18s;font-family:inherit}
+.icon-btn:hover{background:var(--surface2);transform:scale(1.05);color:var(--accent)}
+.icon-btn:active{transform:scale(.95)}
+
+/* ========== STAGES ========== */
+.stages-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.stage-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;
+  padding:14px 10px;cursor:pointer;transition:.2s;text-align:center;
+  position:relative;overflow:hidden}
+.stage-card:hover:not(.locked){transform:translateY(-3px);border-color:var(--accent);
+  box-shadow:0 12px 30px -10px var(--accent)}
+.stage-num{width:44px;height:44px;margin:0 auto 8px;border-radius:12px;
+  display:grid;place-items:center;font-size:18px;font-weight:900;color:#061020;
+  background:linear-gradient(135deg,var(--accent),color-mix(in srgb,var(--accent) 50%,#fff))}
+.stage-num.locked{background:rgba(255,255,255,.12);color:var(--dim)}
+.stage-num i{font-size:16px}
+.stage-title{font-size:13px;font-weight:800;margin-bottom:2px}
+.stage-diff{font-size:11px;color:var(--dim)}
+.stage-best{margin-top:6px;font-size:11px;color:var(--warn);font-weight:800;
+  display:flex;align-items:center;justify-content:center;gap:4px}
+.stage-best i{font-size:10px}
+.stage-card.locked{opacity:.5;cursor:not-allowed;filter:grayscale(.7)}
+
+/* ========== QUIZ ========== */
+.q-top{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.q-prog{flex:1;height:7px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden}
+.q-prog i{display:block;height:100%;width:0;background:var(--accent);
+  border-radius:99px;transition:width .35s}
+.q-count{font-size:13px;color:var(--dim);font-weight:700;min-width:56px;
+  text-align:left;direction:ltr}
+.q-count b{color:var(--text);font-size:15px}
+
+.q-meta{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;align-items:center}
+.q-chip{font-size:12px;font-weight:800;padding:5px 11px;border-radius:99px;
+  background:var(--surface2);border:1px solid var(--border);
+  display:inline-flex;align-items:center;gap:6px}
+.q-chip i{font-size:11px}
+.q-chip.cat{border-color:color-mix(in srgb,var(--accent) 40%,transparent)}
+.hearts{display:flex;gap:3px;font-size:16px;margin-right:auto}
+.heart{color:#ef4444;opacity:.3;transition:.3s}
+.heart.on{opacity:1;filter:drop-shadow(0 0 6px #ef4444)}
+.heart.lose{animation:heartBreak .55s ease forwards}
+@keyframes heartBreak{to{transform:scale(1.8) rotate(15deg);opacity:0;
+  filter:drop-shadow(0 0 20px #ef4444)}}
+.q-score{font-size:12.5px;font-weight:800;color:var(--accent);
+  background:var(--surface2);padding:5px 11px;border-radius:99px;
+  border:1px solid color-mix(in srgb,var(--accent) 40%,transparent);
+  display:inline-flex;align-items:center;gap:5px}
+.q-score i{font-size:11px}
+
+.q-timer{position:relative;height:6px;border-radius:99px;
+  background:rgba(255,255,255,.08);margin-bottom:22px}
+.q-timer i{display:block;height:100%;width:100%;background:var(--ok);
+  border-radius:99px;transition:background .3s}
+.q-timer b{position:absolute;top:-11px;left:-4px;font-size:11px;font-weight:900;
+  background:rgba(255,255,255,.12);border:1px solid var(--border);border-radius:99px;
+  padding:1px 8px;min-width:28px;text-align:center;direction:ltr;
+  display:inline-flex;align-items:center;justify-content:center;gap:3px}
+.q-timer b i{font-size:9px}
+
+.q-text{font-size:clamp(17px,4.5vw,20px);font-weight:800;line-height:1.55;
+  margin-bottom:16px;min-height:56px}
+.q-opts{display:grid;gap:9px}
+.q-opt{display:flex;align-items:center;gap:12px;padding:15px 16px;min-height:56px;
+  border-radius:14px;background:var(--surface);border:1px solid var(--border);
+  cursor:pointer;transition:.15s;font-size:15.5px;font-weight:600;
+  text-align:right;color:var(--text);font-family:inherit;width:100%;line-height:1.4}
+.q-opt:hover:not(.dis){background:color-mix(in srgb,var(--accent) 12%,var(--surface));
+  border-color:var(--accent);transform:translateX(-3px)}
+.q-opt:active:not(.dis){transform:scale(.98)}
+.q-opt .ltr{width:30px;height:30px;flex:0 0 30px;border-radius:9px;
+  display:grid;place-items:center;background:rgba(255,255,255,.1);
+  font-weight:900;font-size:12px}
+.q-opt.ok{background:rgba(34,197,94,.18);border-color:var(--ok);
+  animation:pop .3s ease}
+.q-opt.ok .ltr{background:var(--ok);color:#061020}
+.q-opt.no{background:rgba(239,68,68,.16);border-color:var(--bad)}
+.q-opt.no .ltr{background:var(--bad);color:#fff}
+.q-opt.dis{cursor:default}
+.q-opt.gone{opacity:.22;pointer-events:none;filter:blur(1px)}
+@keyframes pop{from{transform:scale(.95)}to{transform:scale(1)}}
+
+.powerups{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}
+.pu{background:var(--surface);border:1px solid var(--border);border-radius:12px;
+  padding:10px 6px;cursor:pointer;font-family:inherit;color:var(--text);
+  font-size:11px;font-weight:800;transition:.18s;line-height:1.3;
+  display:flex;flex-direction:column;align-items:center;gap:3px}
+.pu:hover:not(:disabled){background:var(--surface2);border-color:var(--accent);
+  transform:translateY(-2px)}
+.pu:disabled{opacity:.3;cursor:not-allowed}
+.pu .ico{font-size:16px;color:var(--accent)}
+.pu:disabled .ico{color:var(--dim)}
+
+/* ========== RESULT ========== */
+.res-stars{font-size:32px;margin-bottom:10px;min-height:46px;text-align:center;
+  display:flex;justify-content:center;gap:6px}
+.res-stars i{animation:starPop .5s cubic-bezier(.2,1.4,.4,1) backwards}
+@keyframes starPop{from{transform:scale(0) rotate(-90deg);opacity:0}to{transform:none;opacity:1}}
+.res-title{font-size:22px;font-weight:900;text-align:center;margin-bottom:6px}
+.res-score{font-size:52px;font-weight:900;line-height:1;text-align:center;
+  background:linear-gradient(135deg,var(--accent),#fff);
+  -webkit-background-clip:text;background-clip:text;color:transparent;margin-top:6px}
+.res-lbl{text-align:center;color:var(--dim);font-size:12px;margin-bottom:18px}
+.res-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:18px}
+.res-stats>div{background:var(--surface);border:1px solid var(--border);
+  border-radius:12px;padding:11px 8px;text-align:center}
+.res-stats i{font-size:15px;color:var(--accent);margin-bottom:3px;display:block}
+.res-stats b{display:block;font-size:17px;font-weight:900;color:var(--text)}
+.res-stats span{font-size:10.5px;color:var(--dim)}
+.res-actions{display:grid;gap:9px;margin-top:16px}
+.btn{border:0;border-radius:14px;padding:14px 22px;font-size:15px;font-weight:800;
+  font-family:inherit;cursor:pointer;transition:.2s;width:100%;
+  color:#061020;line-height:1.4;
+  display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.btn.primary{background:linear-gradient(135deg,var(--accent),color-mix(in srgb,var(--accent) 60%,#fff));
+  box-shadow:0 12px 30px -8px var(--accent)}
+.btn.primary:hover{transform:translateY(-2px)}
+.btn.ghost{background:var(--surface);color:var(--text);border:1px solid var(--border)}
+.btn.ghost:hover{background:var(--surface2);border-color:var(--border2)}
+.btn:active{transform:scale(.98)}
+
+/* ========== ABOUT ========== */
+.about-card{text-align:center}
+.about-photo{width:130px;height:130px;border-radius:50%;object-fit:cover;
+  margin:0 auto 16px;border:3px solid var(--accent);
+  box-shadow:0 0 30px color-mix(in srgb,var(--accent) 60%,transparent)}
+.about-fb{width:130px;height:130px;border-radius:50%;margin:0 auto 16px;
+  background:linear-gradient(135deg,#a855f7,#38bdf8);display:grid;place-items:center;
+  font-size:48px;font-weight:900;color:#fff;border:3px solid var(--accent)}
+.about-name{font-size:24px;font-weight:900;margin-bottom:4px;
+  background:linear-gradient(135deg,var(--accent),#fff);
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+.about-role{font-size:13px;color:var(--dim);margin-bottom:16px;
+  display:flex;align-items:center;justify-content:center;gap:6px}
+.about-role i{color:var(--accent)}
+.about-desc{font-size:13.5px;line-height:1.8;color:var(--dim);text-align:right;
+  background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px}
+.about-desc b{color:var(--text)}
+.about-desc i{color:var(--accent);margin-left:4px}
+.about-version{font-size:11px;color:var(--dim);margin-top:14px;opacity:.7;
+  display:flex;align-items:center;justify-content:center;gap:6px}
+
+/* ========== CONFETTI ========== */
+.confetti{position:fixed;top:-30px;pointer-events:none;z-index:9999;
+  animation:fall 2.5s linear forwards}
+@keyframes fall{to{transform:translateY(110dvh) rotate(720deg);opacity:0}}
+
+/* ========== RESPONSIVE ========== */
+@media(min-width:480px){
+  body{padding:var(--safe-t) 18px var(--safe-b)}
+  .cats-grid{gap:12px}
+  .cat-card{padding:20px 14px}
+  .cat-icon{font-size:34px}
+  .stages-grid{grid-template-columns:repeat(3,1fr)}
+  .splash-logo{width:150px;height:150px}
+}
+@media(min-width:640px){
+  .cats-grid{grid-template-columns:repeat(3,1fr)}
+  .cat-card{padding:22px 16px}
+  .stages-grid{grid-template-columns:repeat(4,1fr)}
+  .q-opt{font-size:16.5px;padding:17px 18px}
+  .res-stats{grid-template-columns:repeat(4,1fr)}
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ========== SPLASH ========== -->
+  <section class="screen active" id="scr-splash">
+    <div class="splash">
+      <div class="splash-particles" id="splashParticles"></div>
+
+      <div class="splash-logo" id="splashLogo">
+        <img src="https://i54.servimg.com/u/f54/18/11/62/61/17942410.jpg" alt="جمجم"
+             onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+        <span class="fb" style="display:none">جمجم</span>
+      </div>
+
+      <h1 class="splash-title">جمجم</h1>
+      <p class="splash-tagline">لعبة الأذكياء · اختبر معلوماتك</p>
+
+      <div class="splash-welcome">
+        <span id="typeText"></span>
+      </div>
+
+      <div class="splash-input" id="nameInputWrap" style="display:none">
+        <input type="text" id="playerName" placeholder="اكتب اسمك هنا..."
+               maxlength="20" autocomplete="off">
+      </div>
+
+      <button class="btn-enter" id="btnEnter">
+        <i class="fas fa-rocket"></i>
+        <span id="btnEnterLabel">ابدأ الرحلة</span>
+      </button>
+
+      <p class="splash-dev">
+        صنع بـ <span class="heart"><i class="fas fa-heart"></i></span> بواسطة <b>Famo</b>
+      </p>
+    </div>
+  </section>
+
+  <!-- ========== HOME ========== -->
+  <section class="screen" id="scr-home">
+    <div class="home-top">
+      <div class="home-greeting">
+        <i class="fas fa-hand-sparkles hand"></i>
+        أهلاً <b id="homeName">بطل</b>
+        <button class="edit-btn" id="editName" title="تغيير الاسم">
+          <i class="fas fa-pen"></i>
+        </button>
+      </div>
+      <button class="sound-btn" id="soundToggle" title="الصوت">
+        <i class="fas fa-volume-high"></i>
+      </button>
+    </div>
+
+    <div class="brand">
+      <div class="logo-wrap" id="homeLogo">
+        <img src="https://i54.servimg.com/u/f54/18/11/62/61/17942410.jpg" alt="جمجم"
+             onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+        <span class="logo-fallback" style="display:none">جمجم</span>
+      </div>
+      <h1>جمجم</h1>
+      <p>لعبة الأذكياء · اختبر معلوماتك</p>
+    </div>
+
+    <div class="home-stats">
+      <div class="hs-item">
+        <i class="fas fa-star"></i>
+        <b id="statStars">0</b>
+        <small>نجوم</small>
+      </div>
+      <div class="hs-item">
+        <i class="fas fa-fire"></i>
+        <b id="statStreak">0</b>
+        <small>أفضل سلسلة</small>
+      </div>
+      <div class="hs-item">
+        <i class="fas fa-gamepad"></i>
+        <b id="statGames">0</b>
+        <small>جولات</small>
+      </div>
+    </div>
+
+    <h2 class="section-title">
+      <i class="fas fa-layer-group"></i>
+      اختر القسم
+    </h2>
+    <div class="cats-grid" id="catsGrid"></div>
+
+    <h2 class="section-title">
+      <i class="fas fa-bolt"></i>
+      أوضاع إضافية
+    </h2>
+    <div class="modes">
+      <button class="mode-btn" data-mode="daily">
+        <span class="ico"><i class="fas fa-calendar-day"></i></span>
+        تحدي اليوم
+      </button>
+      <button class="mode-btn" data-mode="survival">
+        <span class="ico"><i class="fas fa-fire"></i></span>
+        وضع البقاء
+      </button>
+      <button class="mode-btn" data-mode="about">
+        <span class="ico"><i class="fas fa-circle-info"></i></span>
+        عن اللعبة
+      </button>
+    </div>
+
+    <div class="dev-footer">
+      <img src="https://i.servimg.com/u/f54/18/11/62/61/picsar11.jpg"
+           class="dev-avatar" alt="Famo"
+           onerror="this.style.display='none';this.nextElementSibling.style.display='grid'">
+      <div class="dev-avatar-fb" style="display:none">F</div>
+      <span>تطوير: <b>Famo</b></span>
+    </div>
+  </section>
+
+  <!-- ========== STAGES ========== -->
+  <section class="screen" id="scr-stages">
+    <div class="topbar">
+      <button class="icon-btn" data-back>
+        <i class="fas fa-arrow-right"></i>
+      </button>
+      <h2 id="stageTitle">المراحل</h2>
+      <button class="icon-btn" data-reset title="إعادة تعيين">
+        <i class="fas fa-rotate-right"></i>
+      </button>
+    </div>
+    <div class="stages-grid" id="stagesGrid"></div>
+  </section>
+
+  <!-- ========== QUIZ ========== -->
+  <section class="screen" id="scr-quiz">
+    <div class="card" style="background:var(--surface);border:1px solid var(--border);border-radius:22px;padding:22px 18px;backdrop-filter:blur(20px);box-shadow:0 22px 60px rgba(0,0,0,.4)">
+      <div class="q-top">
+        <button class="icon-btn" data-quit>
+          <i class="fas fa-xmark"></i>
+        </button>
+        <div class="q-prog"><i id="qProg"></i></div>
+        <span class="q-count"><b id="qNum">1</b>/<span id="qTot">20</span></span>
+      </div>
+      <div class="q-meta">
+        <span class="q-chip cat" id="qCat">
+          <i class="fas fa-calculator"></i>
+          <span>رياضيات</span>
+        </span>
+        <span class="hearts" id="qHearts"></span>
+        <span class="q-score" id="qScore">
+          <i class="fas fa-star"></i>
+          <span>0</span>
+        </span>
+      </div>
+      <div class="q-timer">
+        <i id="qTimerFill"></i>
+        <b><i class="fas fa-clock"></i><span id="qTimerNum">30</span></b>
+      </div>
+      <div class="q-text" id="qText"></div>
+      <div class="q-opts" id="qOpts"></div>
+      <div class="powerups">
+        <button class="pu" data-pu="fifty">
+          <span class="ico"><i class="fas fa-bolt"></i></span>
+          50/50
+        </button>
+        <button class="pu" data-pu="freeze">
+          <span class="ico"><i class="fas fa-snowflake"></i></span>
+          تجميد
+        </button>
+        <button class="pu" data-pu="skip">
+          <span class="ico"><i class="fas fa-forward"></i></span>
+          تخطي
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== RESULT ========== -->
+  <section class="screen" id="scr-result">
+    <div class="card" style="background:var(--surface);border:1px solid var(--border);border-radius:22px;padding:22px 18px;backdrop-filter:blur(20px);box-shadow:0 22px 60px rgba(0,0,0,.4)">
+      <div class="res-stars" id="resStars"></div>
+      <h2 class="res-title" id="resTitle">أحسنت!</h2>
+      <div class="res-score" id="resScore">0</div>
+      <p class="res-lbl">نقطة</p>
+      <div class="res-stats">
+        <div>
+          <i class="fas fa-check-circle"></i>
+          <b id="resCorrect">0</b>
+          <span>صحيحة</span>
+        </div>
+        <div>
+          <i class="fas fa-bullseye"></i>
+          <b id="resAcc">0%</b>
+          <span>الدقة</span>
+        </div>
+        <div>
+          <i class="fas fa-fire"></i>
+          <b id="resStreak">0</b>
+          <span>سلسلة</span>
+        </div>
+        <div>
+          <i class="fas fa-clock"></i>
+          <b id="resTime">0</b>
+          <span>ثانية</span>
+        </div>
+      </div>
+      <div class="res-actions">
+        <button class="btn primary" id="btnNext">
+          <i class="fas fa-arrow-left"></i>
+          المرحلة التالية
+        </button>
+        <button class="btn ghost" id="btnRetry">
+          <i class="fas fa-rotate-right"></i>
+          إعادة المحاولة
+        </button>
+        <button class="btn ghost" id="btnHome">
+          <i class="fas fa-house"></i>
+          الرئيسية
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== ABOUT ========== -->
+  <section class="screen" id="scr-about">
+    <div class="topbar">
+      <button class="icon-btn" data-back>
+        <i class="fas fa-arrow-right"></i>
+      </button>
+      <h2>عن اللعبة</h2>
+      <span style="width:42px"></span>
+    </div>
+    <div class="card" style="background:var(--surface);border:1px solid var(--border);border-radius:22px;padding:22px 18px;text-align:center;backdrop-filter:blur(20px)">
+      <img src="https://i.servimg.com/u/f54/18/11/62/61/picsar11.jpg"
+           class="about-photo" alt="Famo"
+           onerror="this.style.display='none';this.nextElementSibling.style.display='grid'">
+      <div class="about-fb" style="display:none">F</div>
+      <div class="about-name">Famo</div>
+      <div class="about-role">
+        <i class="fas fa-code"></i>
+        مطوّر الألعاب التفاعلية
+      </div>
+      <div class="about-desc">
+        <b><i class="fas fa-brain"></i> جمجم</b> لعبة أذكياء تفاعلية تجمع بين المتعة والتحدي.<br><br>
+        <b><i class="fas fa-layer-group"></i> الأقسام:</b> رياضيات، ثقافة، فن، علوم، كورة قدم، مختلط.<br><br>
+        <b><i class="fas fa-gem"></i> المميزات:</b> قلوب، كومبو، Power-ups، تحدي يومي، وضع بقاء، بنك أسئلة متجدد.<br><br>
+        <b><i class="fas fa-microchip"></i> التقنية:</b> HTML · CSS · JavaScript · Font Awesome 6 — تعمل بالكامل بدون إنترنت.<br><br>
+        <i class="fas fa-heart" style="color:#ef4444"></i> شكراً لثقتكم
+      </div>
+      <div class="about-version">
+        <i class="fas fa-tag"></i>
+        الإصدار 3.0 · نسخة سينمائية
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+"use strict";
+
+/* ============ UTILS ============ */
+const $ = s => document.querySelector(s);
+const $$ = s => document.querySelectorAll(s);
+const ri = (a,b) => Math.floor(Math.random()*(b-a+1))+a;
+const pick = a => a[Math.floor(Math.random()*a.length)];
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function vibrate(p){try{if(navigator.vibrate)navigator.vibrate(p);}catch(e){}}
+
+/* ============ CATEGORIES ============ */
+const CATS = {
+  math:    {name:'رياضيات', faIcon:'fa-calculator', color:'#38bdf8', stages:10},
+  culture: {name:'ثقافة',   faIcon:'fa-globe',      color:'#fbbf24', stages:10},
+  art:     {name:'فن',      faIcon:'fa-palette',    color:'#f472b6', stages:10},
+  science: {name:'علوم',    faIcon:'fa-flask',      color:'#34d399', stages:10},
+  football:{name:'كورة قدم',faIcon:'fa-futbol',     color:'#a3e635', stages:6},
+  mixed:   {name:'مختلط',   faIcon:'fa-dice',       color:'#a855f7', stages:10}
+};
+const FOOTBALL_LEVELS = ['المونديال','النجوم','الأندية','البطولات','الأرقام','الألغاز'];
+
+/* ============ FOOTBALL DATA ============ */
+const WC = [
+  {y:1930,host:'أوروغواي',ch:'أوروغواي',ru:'الأرجنتين',top:'غييرمو ستابيلي'},
+  {y:1934,host:'إيطاليا',ch:'إيطاليا',ru:'تشيكوسلوفاكيا',top:'أولدرايخ نيدلي'},
+  {y:1938,host:'فرنسا',ch:'إيطاليا',ru:'المجر',top:'ليونيداس'},
+  {y:1950,host:'البرازيل',ch:'أوروغواي',ru:'البرازيل',top:'أديمير'},
+  {y:1954,host:'سويسرا',ch:'ألمانيا الغربية',ru:'المجر',top:'شاندور كوتشيتش'},
+  {y:1958,host:'السويد',ch:'البرازيل',ru:'السويد',top:'جوست فونتين'},
+  {y:1962,host:'تشيلي',ch:'البرازيل',ru:'تشيكوسلوفاكيا',top:'فلوريان ألبرت'},
+  {y:1966,host:'إنجلترا',ch:'إنجلترا',ru:'ألمانيا الغربية',top:'يوزيبيو'},
+  {y:1970,host:'المكسيك',ch:'البرازيل',ru:'إيطاليا',top:'غيرد مولر'},
+  {y:1974,host:'ألمانيا الغربية',ch:'ألمانيا الغربية',ru:'هولندا',top:'غجيغوج لاتو'},
+  {y:1978,host:'الأرجنتين',ch:'الأرجنتين',ru:'هولندا',top:'ماريو كيمبس'},
+  {y:1982,host:'إسبانيا',ch:'إيطاليا',ru:'ألمانيا الغربية',top:'باولو روسي'},
+  {y:1986,host:'المكسيك',ch:'الأرجنتين',ru:'ألمانيا الغربية',top:'غاري لينيكر'},
+  {y:1990,host:'إيطاليا',ch:'ألمانيا الغربية',ru:'الأرجنتين',top:'سالفاتوري سكيلاتشي'},
+  {y:1994,host:'الولايات المتحدة',ch:'البرازيل',ru:'إيطاليا',top:'أوليغ سالينكو'},
+  {y:1998,host:'فرنسا',ch:'فرنسا',ru:'البرازيل',top:'دافور شوكر'},
+  {y:2002,host:'كوريا واليابان',ch:'البرازيل',ru:'ألمانيا',top:'رونالدو'},
+  {y:2006,host:'ألمانيا',ch:'إيطاليا',ru:'فرنسا',top:'ميروسلاف كلوزه'},
+  {y:2010,host:'جنوب أفريقيا',ch:'إسبانيا',ru:'هولندا',top:'توماس مولر'},
+  {y:2014,host:'البرازيل',ch:'ألمانيا',ru:'الأرجنتين',top:'خاميس رودريغيز'},
+  {y:2018,host:'روسيا',ch:'فرنسا',ru:'كرواتيا',top:'هاري كين'},
+  {y:2022,host:'قطر',ch:'الأرجنتين',ru:'فرنسا',top:'كيليان مبابي'}
+];
+const CL = {2004:'بورتو',2005:'ليفربول',2006:'برشلونة',2007:'ميلان',2008:'مان يونايتد',2009:'برشلونة',
+  2010:'إنتر ميلان',2011:'برشلونة',2012:'تشيلسي',2013:'بايرن ميونخ',2014:'ريال مدريد',
+  2015:'برشلونة',2016:'ريال مدريد',2017:'ريال مدريد',2018:'ريال مدريد',2019:'ليفربول',
+  2020:'بايرن ميونخ',2021:'تشيلسي',2022:'ريال مدريد',2023:'مان سيتي',2024:'ريال مدريد'};
+const BALLON = {2000:'لويس فيغو',2001:'مايكل أوين',2002:'رونالدو',2003:'بافل نيدفيد',2004:'أندريه شيفتشينكو',
+  2005:'رونالدينيو',2006:'فابيو كانافارو',2007:'كاكا',2008:'كريستيانو رونالدو',2009:'ليونيل ميسي',
+  2010:'ليونيل ميسي',2011:'ليونيل ميسي',2012:'ليونيل ميسي',2013:'كريستيانو رونالدو',
+  2014:'كريستيانو رونالدو',2015:'ليونيل ميسي',2016:'كريستيانو رونالدو',2017:'كريستيانو رونالدو',
+  2018:'لوكا مودريتش',2019:'ليونيل ميسي',2021:'ليونيل ميسي',2022:'كريم بنزيما',2023:'ليونيل ميسي',2024:'رودري'};
+const AFCON = {2000:'الكاميرون',2002:'الكاميرون',2004:'تونس',2006:'مصر',2008:'مصر',2010:'مصر',
+  2012:'زامبيا',2013:'نيجيريا',2015:'ساحل العاج',2017:'الكاميرون',2019:'الجزائر',2021:'السنغال',2023:'ساحل العاج'};
+const EURO = {2000:'فرنسا',2004:'اليونان',2008:'إسبانيا',2012:'إسبانيا',2016:'البرتغال',2020:'إيطاليا',2024:'إسبانيا'};
+
+const COUNTRIES = [
+  ['مصر','القاهرة'],['السعودية','الرياض'],['الإمارات','أبوظبي'],['الكويت','الكويت'],['قطر','الدوحة'],
+  ['البحرين','المنامة'],['عمان','مسقط'],['الأردن','عمّان'],['لبنان','بيروت'],['سوريا','دمشق'],
+  ['العراق','بغداد'],['اليمن','صنعاء'],['فلسطين','القدس'],['السودان','الخرطوم'],['ليبيا','طرابلس'],
+  ['تونس','تونس'],['الجزائر','الجزائر'],['المغرب','الرباط'],['موريتانيا','نواكشوط'],['الصومال','مقديشو'],
+  ['فرنسا','باريس'],['ألمانيا','برلين'],['إيطاليا','روما'],['إسبانيا','مدريد'],['البرتغال','لشبونة'],
+  ['بريطانيا','لندن'],['هولندا','أمستردام'],['بلجيكا','بروكسل'],['سويسرا','برن'],['السويد','ستوكهولم'],
+  ['النرويج','أوسلو'],['الدنمارك','كوبنهاغن'],['فنلندا','هلسنكي'],['اليونان','أثينا'],['تركيا','أنقرة'],
+  ['روسيا','موسكو'],['أوكرانيا','كييف'],['بولندا','وارساو'],['النمسا','فيينا'],['المجر','بودابست'],
+  ['أمريكا','واشنطن'],['كندا','أوتاوا'],['المكسيك','مكسيكو سيتي'],['البرازيل','برازيليا'],['الأرجنتين','بوينس آيرس'],
+  ['تشيلي','سانتياغو'],['بيرو','ليما'],['كولومبيا','بوغوتا'],['فنزويلا','كاراكاس'],['أوروغواي','مونتيفيديو'],
+  ['الصين','بكين'],['اليابان','طوكيو'],['كوريا الجنوبية','سيول'],['الهند','نيودلهي'],['باكستان','إسلام آباد'],
+  ['إندونيسيا','جاكرتا'],['ماليزيا','كوالالمبور'],['تايلاند','بانكوك'],['فيتنام','هانوي'],['الفلبين','مانيلا'],
+  ['أستراليا','كانبرا'],['نيوزيلندا','ويلينغتون'],['جنوب أفريقيا','بريتوريا'],['نيجيريا','أبوجا'],['كينيا','نيروبي'],
+  ['إثيوبيا','أديس أبابا'],['غانا','أكرا'],['السنغال','داكار'],['الكاميرون','ياوندي'],['أوغندا','كمبالا'],
+  ['إيران','طهران'],['أفغانستان','كابول'],['كازاخستان','أستانا'],['أذربيجان','باكو'],['جورجيا','تبليسي'],
+  ['أرمينيا','يريفان'],['كوبا','هافانا'],['جامايكا','كينغستون'],['بنما','بنما سيتي'],['كوستاريكا','سان خوسيه']
+];
+
+/* ============ STATIC BANKS ============ */
+const BANK_CULTURE = [
+  ['من مؤلف «المقدمة»؟','ابن خلدون',['ابن بطوطة','ابن سينا','ابن رشد'],4],
+  ['ما أكبر محيط في العالم؟','الهادئ',['الأطلسي','الهندي','المتجمد'],2],
+  ['كم عدد الدول العربية؟','22',['20','23','18'],5],
+  ['أين يقع برج إيفل؟','باريس',['لندن','روما','برلين'],1],
+  ['كم عدد سور القرآن؟','114',['112','110','120'],2],
+  ['ما عملة اليابان؟','الين',['اليوان','الوون','الدولار'],3],
+  ['أصغر دولة في العالم؟','الفاتيكان',['موناكو','مالطا','سان مارينو'],4],
+  ['أطول نهر في أفريقيا؟','النيل',['الكونغو','النيجر','الزمبيزي'],2],
+  ['ما أكبر صحراء حارة؟','الصحراء الكبرى',['الربع الخالي','غوبي','كالاهاري'],2],
+  ['من فاز بمونديال 2022؟','الأرجنتين',['فرنسا','البرازيل','ألمانيا'],3],
+  ['أول رئيس أمريكي؟','واشنطن',['لينكولن','جيفرسون','آدامز'],3],
+  ['ما أكبر دولة مساحة؟','روسيا',['كندا','الصين','أمريكا'],2],
+  ['من «شاعر النيل»؟','حافظ إبراهيم',['أحمد شوقي','المتنبي','نزار قباني'],6],
+  ['كم يوم في السنة الكبيسة؟','366',['365','364','367'],1],
+  ['ما عاصمة كندا؟','أوتاوا',['تورونتو','مونتريال','فانكوفر'],4],
+  ['في أي عام بدأت الحرب العالمية الأولى؟','1914',['1918','1939','1905'],5],
+  ['من قاد أول رحلة حول العالم؟','ماجلان',['كولومبوس','فاسكو دا غاما','كوك'],5],
+  ['ما أكبر جزيرة؟','جرينلاند',['مدغشقر','بورنيو','أستراليا'],5],
+  ['أين تقع البتراء؟','الأردن',['مصر','لبنان','سوريا'],3],
+  ['كم عدد أيام الأسبوع؟','7',['5','6','8'],1],
+  ['ما عاصمة اليابان؟','طوكيو',['أوساكا','كيوتو','سيول'],1],
+  ['ما اللغة الأكثر تحدثاً كلغة أم؟','الصينية',['الإنجليزية','الإسبانية','الهندية'],4],
+  ['من «أمير الشعراء»؟','أحمد شوقي',['حافظ إبراهيم','المتنبي','البحتري'],5],
+  ['ما عاصمة تركيا؟','أنقرة',['إسطنبول','إزمير','بورصة'],4],
+  ['كم عدد حروف العربية؟','28',['26','29','30'],1],
+  ['أي دولة «بلاد الشمس المشرقة»؟','اليابان',['الصين','كوريا','تايلاند'],2],
+  ['ما عاصمة إسبانيا؟','مدريد',['برشلونة','إشبيلية','فالنسيا'],2],
+  ['أي مدينة بين قارتين؟','إسطنبول',['القاهرة','أثينا','موسكو'],4],
+  ['من مؤلف «مئة عام من العزلة»؟','ماركيز',['نيرودا','بورخيس','همنغواي'],7],
+  ['ما أصغر قارة؟','أستراليا',['أوروبا','أنتاركتيكا','أمريكا الجنوبية'],4],
+  ['كم عدد قارات العالم؟','7',['5','6','8'],2],
+  ['ما البحر بين آسيا وأفريقيا؟','الأحمر',['المتوسط','العرب','الأسود'],3],
+  ['في أي عام هبط الإنسان على القمر؟','1969',['1965','1972','1961'],3],
+  ['من مؤلف «القانون في الطب»؟','ابن سينا',['الرازي','ابن النفيس','ابن رشد'],5],
+  ['ما عاصمة إيطاليا؟','روما',['ميلانو','البندقية','نابولي'],1],
+  ['في أي قارة الأرجنتين؟','أمريكا الجنوبية',['الشمالية','أوروبا','أفريقيا'],1],
+  ['من قائد معركة حطين؟','صلاح الدين',['خالد بن الوليد','عمرو بن العاص','طارق بن زياد'],4],
+  ['ما أطول سور في العالم؟','سور الصين',['برلين','هاديان','بابل'],1],
+  ['كم عدد أعضاء جامعة الدول العربية؟','22',['20','23','18'],5]
+];
+
+const BANK_ART = [
+  ['من رسم «الموناليزا»؟','دافنشي',['مايكل أنجلو','رافائيل','بيكاسو'],1],
+  ['من نحت «داوود»؟','مايكل أنجلو',['رودان','دوناتيلو','برنيني'],3],
+  ['من رسم «ليلة النجوم»؟','فان جوخ',['مونيه','بيكاسو','دالي'],3],
+  ['آلة بـ88 مفتاحاً؟','البيانو',['الأورغ','الأكورديون','القيثارة'],2],
+  ['من مؤلف السمفونية الخامسة؟','بيتهوفن',['موتسارت','باخ','شوبان'],3],
+  ['من رسم «الصرخة»؟','مونك',['فان جوخ','بيكاسو','غويا'],6],
+  ['مؤسس التكعيبية؟','بيكاسو',['دالي','ميرو','غويا'],4],
+  ['من مؤلف «الحرافيش»؟','نجيب محفوظ',['يوسف إدريس','توفيق الحكيم','الطيب صالح'],5],
+  ['«كوكب الشرق»؟','أم كلثوم',['فيروز','أسمهان','وردة'],2],
+  ['حركة سلفادور دالي؟','السريالية',['التكعيبية','الانطباعية','التعبيرية'],6],
+  ['من رسم سقف سيستين؟','مايكل أنجلو',['دافنشي','رافائيل','تيبولو'],6],
+  ['من مؤلف «البؤساء»؟','هوغو',['بلزاك','زولا','فلوبير'],4],
+  ['من كتب «روميو وجولييت»؟','شكسبير',['مارلو','موليير','برنارد شو'],2],
+  ['من مؤلف «الفصول الأربعة»؟','فيفالدي',['باخ','موتسارت','هايدن'],6],
+  ['من رسم «الفتاة ذات القرط»؟','فيرمير',['ريمبرانت','بروغل','فيلاسكيز'],7],
+  ['«العندليب الأسمر»؟','عبد الحليم',['عبد الوهاب','فريد الأطرش','وديع الصافي'],3],
+  ['فن طي الورق الياباني؟','الأوريغامي',['الإيكيبانا','الكاليغرافي','الأنيمي'],4],
+  ['من مؤلف «موسم الهجرة»؟','الطيب صالح',['نجيب محفوظ','الطاهر وطار','منيف'],6],
+  ['من رسم «غرنيكا»؟','بيكاسو',['دالي','ميرو','شاغال'],6],
+  ['كم عدد ألوان الطيف؟','7',['5','6','8'],1],
+  ['الألوان الأساسية RYB؟','أحمر وأزرق وأصفر',['أحمر وأخضر وأزرق','أصفر وأزرق وأخضر','أحمر وأبيض وأسود'],3],
+  ['من مؤلف «الجريمة والعقاب»؟','دوستويفسكي',['تولستوي','تشيخوف','تورغينيف'],5],
+  ['من فقد السمع؟','بيتهوفن',['موتسارت','باخ','برامز'],3],
+  ['من رسم «العشاء الأخير»؟','دافنشي',['مايكل أنجلو','رافائيل','كارافاجيو'],2],
+  ['من مؤلف «أولاد حارتنا»؟','نجيب محفوظ',['يوسف إدريس','توفيق الحكيم','إحسان عبد القدوس'],5],
+  ['خط المصاحف الشائع؟','النسخ',['الرقعة','الكوفي','الديواني'],4],
+  ['من مؤلف «الحرب والسلام»؟','تولستوي',['دوستويفسكي','بوشكين','غوغول'],5],
+  ['فرقة ليفربول الشهيرة؟','البيتلز',['الرولينغ ستونز','كوين','بينك فلويد'],3],
+  ['من رسم «ميلاد فينوس»؟','بوتيتشيلي',['دافنشي','مايكل أنجلو','تيتيان'],7],
+  ['«موسيقار الأجيال»؟','عبد الوهاب',['عبد الحليم','فريد الأطرش','السنباطي'],4],
+  ['من مؤلف «كبرياء وهوى»؟','جين أوستن',['شارلوت برونتي','وولف','شيلي'],6],
+  ['من مؤلف «العطر»؟','زوسكيند',['هسه','مان','غراس'],7],
+  ['رقصة إسبانية سريعة؟','الفلامنكو',['التانغو','السالسا','الباليه'],4],
+  ['صاحب «قارئة الفنجان»؟','نزار قباني',['أدونيس','درويش','السياب'],4],
+  ['من مؤلف «أهل الكهف»؟','توفيق الحكيم',['نجيب محفوظ','يوسف إدريس','ونوس'],6],
+  ['من مؤلف «الكوميديا الإلهية»؟','دانتي',['بترارك','بوكاتشيو','فيرجيل'],6],
+  ['آلة وترية شرقية؟','العود',['الكمان','القانون','الناي'],2],
+  ['«شاعر الحكمة»؟','المتنبي',['أبو نواس','البحتري','جرير'],5],
+  ['أول فيلم رسوم طويل لديزني؟','سنو وايت',['بينوكيو','سندريلا','بامبي'],6],
+  ['من مؤلف «هاري بوتر»؟','رولينغ',['كينغ','كريستي','كولينز'],3],
+  ['من نحت «المفكر»؟','رودان',['مايكل أنجلو','دوناتيلو','برنيني'],6],
+  ['فن تشكيل الحروف جمالياً؟','الخط العربي',['الزخرفة','النحت','التصوير'],2],
+  ['من مؤلف «الطاعون»؟','كامو',['سارتر','بروست','هوغو'],7],
+  ['من مؤلف أوبرا «عايدة»؟','فيردي',['فاغنر','بوتشيني','موتسارت'],7],
+  ['أزرق + أصفر =؟','أخضر',['برتقالي','بنفسجي','بني'],2],
+  ['صاحب «سجل أنا عربي»؟','محمود درويش',['سميح القاسم','توفيق زياد','إبراهيم طوقان'],5],
+  ['من مؤلف أوبرا «كارمن»؟','بيزيه',['فيردي','بوتشيني','فاغنر'],8]
+];
+
+const BANK_SCIENCE = [
+  ['أكبر كوكب؟','المشتري',['زحل','نبتون','الأرض'],1],
+  ['وحدة القوة؟','نيوتن',['جول','واط','باسكال'],2],
+  ['رمز الذهب؟','Au',['Ag','Fe','Cu'],3],
+  ['غاز البناء الضوئي؟','CO2',['أكسجين','نيتروجين','هيدروجين'],2],
+  ['أسنان البالغ؟','32',['28','30','36'],2],
+  ['أسرع حيوان بري؟','الفهد',['أسد','حصان','غزال'],1],
+  ['وحدة التيار؟','أمبير',['فولت','أوم','واط'],3],
+  ['الغاز الأكثر وفرة في الجو؟','نيتروجين',['أكسجين','CO2','أرجون'],3],
+  ['أكبر عضو في الجسم؟','الجلد',['كبد','رئة','دماغ'],3],
+  ['صيغة الماء؟','H2O',['CO2','O2','H2O2'],1],
+  ['صاحب قوانين الحركة؟','نيوتن',['أينشتاين','غاليليو','كبلر'],2],
+  ['تجمد الماء؟','0',['-10','10','100'],1],
+  ['الكوكب الأحمر؟','المريخ',['الزهرة','عطارد','المشتري'],1],
+  ['معدن سائل؟','الزئبق',['رصاص','قصدير','ألمنيوم'],4],
+  ['العضو الذي يضخ الدم؟','القلب',['كبد','رئة','كلية'],1],
+  ['كروموسومات الإنسان؟','46',['23','48','44'],4],
+  ['سرعة الضوء؟','300 ألف كم/ث',['150 ألف','30 ألف','3 مليون'],5],
+  ['مكتشف البنسلين؟','فلمنغ',['باستور','كوخ','جينر'],4],
+  ['أكبر جزء في الدماغ؟','المخ',['المخيخ','جذع الدماغ','النخاع'],4],
+  ['وحدة الطاقة؟','جول',['نيوتن','واط','كالوري'],4],
+  ['أقرب كوكب للشمس؟','عطارد',['الزهرة','الأرض','المريخ'],2],
+  ['غاز التنفس؟','أكسجين',['نيتروجين','CO2','هيليوم'],1],
+  ['نظرية أينشتاين؟','النسبية',['التطور','الانفجار','الكوانتم'],3],
+  ['pH الماء النقي؟','7',['0','14','5'],4],
+  ['عضو تنقية الدم؟','الكلية',['كبد','طحال','بنكرياس'],2],
+  ['Fe = ؟','حديد',['فضة','زنك','نحاس'],3],
+  ['عظام البالغ؟','206',['186','216','246'],5],
+  ['أكبر عضلة؟','الألوية',['الفخذ','القلب','الصدرية'],5],
+  ['توأم الأرض؟','الزهرة',['المريخ','عطارد','نبتون'],4],
+  ['حالة الشمس؟','بلازما',['غاز','سائل','صلب'],6],
+  ['مكتشف الإلكترون؟','طومسون',['رذرفورد','بور','شادويك'],7],
+  ['هرمون السكر؟','الأنسولين',['أدرينالين','ثيروكسين','كورتيزول'],4],
+  ['أطول عظم؟','الفخذ',['الساق','العضد','العمود'],3],
+  ['كوكب الحلقات؟','زحل',['المشتري','أورانوس','نبتون'],2],
+  ['تحول الماء لبخار؟','تبخر',['تكثف','تجمد','ترسيب'],2],
+  ['وحدة الضغط؟','باسكال',['نيوتن','جول','أمبير'],5],
+  ['ثديي يطير؟','الخفاش',['سنجاب','بطريق','نعامة'],2],
+  ['Na = ؟','صوديوم',['كبريت','نيتروجين','بوتاسيوم'],5],
+  ['حجرات القلب؟','4',['2','3','5'],2],
+  ['مصدر الطاقة الرئيسي للأرض؟','الشمس',['رياح','وقود','براكين'],1],
+  ['العنصر الأكثر في القشرة؟','أكسجين',['سيليكون','حديد','ألمنيوم'],5],
+  ['مؤسس علم الوراثة؟','مندل',['داروين','واتسون','كريك'],5],
+  ['قانون الفعل ورد الفعل؟','نيوتن الثالث',['الأول','الثاني','أوم'],3],
+  ['أبعد كوكب؟','نبتون',['أورانوس','زحل','بلوتو'],3],
+  ['مضادات الأمراض؟','أجسام مضادة',['هرمونات','إنزيمات','صفائح'],6],
+  ['وحدة الكتلة؟','كيلوغرام',['جرام','نيوتن','رطل'],4],
+  ['تفاعل الشمس النووي؟','اندماج',['انشطار','احتراق','تحلل'],6],
+  ['صاحب التطور؟','داروين',['لامارك','مندل','فايسمان'],4],
+  ['العدد الذري للكربون؟','6',['8','12','14'],5],
+  ['يربط العضلات بالعظام؟','الوتر',['رباط','غضروف','عصب'],5],
+  ['مكتشف الجاذبية؟','نيوتن',['أينشتاين','غاليليو','كبلر'],2]
+];
+
+const BANK_MATH = [
+  ['ما ناتج 7×8؟','56',['54','48','64'],1],
+  ['جذر 144؟','12',['11','13','14'],3],
+  ['2^10؟','1024',['512','2048','256'],5],
+  ['π تقريباً؟','3.14',['2.71','1.61','3.41'],3],
+  ['مجموع زوايا المثلث؟','180',['90','270','360'],2],
+  ['محيط دائرة نصف قطرها 5؟','10π',['5π','25π','20π'],5],
+  ['5! = ؟','120',['60','100','24'],4],
+  ['0.5 = كسر؟','1/2',['1/3','1/4','2/3'],1],
+  ['2 + 2×3 = ؟','8',['12','10','6'],2],
+  ['حل 2س=10؟','5',['4','8','2'],2],
+  ['مساحة مربع ضلعه 7؟','49',['28','14','56'],2],
+  ['15% من 200؟','30',['20','15','25'],4],
+  ['الجذر التكعيبي لـ27؟','3',['9','6','27'],4],
+  ['99 + 1 = ؟','100',['98','101','110'],1],
+  ['25 ÷ 5 = ؟','5',['4','6','10'],1],
+  ['أصغر عدد أولي؟','2',['1','3','0'],2],
+  ['مربع 12؟','144',['132','124','154'],3],
+  ['20 × 20 = ؟','400',['200','40','4000'],2],
+  ['3/4 = نسبة مئوية؟','75%',['60%','50%','80%'],3],
+  ['ما العدد التالي: 2,4,6,8,؟','10',['9','12','14'],1]
+];
+
+const BANK_FOOTBALL = [
+  ['كم مرة فازت البرازيل بالمونديال؟','5',['4','6','3'],2],
+  ['من الهداف التاريخي للمونديال؟','كلوزه',['رونالدو','بيليه','ميسي'],4],
+  ['من فاز بأول مونديال؟','أوروغواي',['إيطاليا','البرازيل','الأرجنتين'],3],
+  ['كم مرة فازت إيطاليا؟','4',['3','5','2'],3],
+  ['كم مرة فازت ألمانيا؟','4',['3','5','2'],3],
+  ['كأس العالم 2026 في؟','أمريكا وكندا والمكسيك',['السعودية','إسبانيا','الصين'],5],
+  ['من هداف مونديال 2022؟','مبابي',['ميسي','رونالدو','بنزيما'],3],
+  ['الهداف التاريخي لدوري الأبطال؟','رونالدو',['ميسي','ليفا','بنزيما'],3],
+  ['النادي الأكثر تتويجاً بأبطال أوروبا؟','ريال مدريد',['ميلان','بايرن','ليفربول'],2],
+  ['كم مرة فاز ريال مدريد بالأبطال؟','15',['14','13','16'],5],
+  ['من فاز بالكرة الذهبية 8 مرات؟','ميسي',['رونالدو','بيليه','مارادونا'],2],
+  ['كم مرة فاز رونالدو بالكرة الذهبية؟','5',['4','6','3'],3],
+  ['من سجل في 5 مونديالات؟','رونالدو',['ميسي','كلوزه','بيليه'],4],
+  ['من فاز بمونديال 1986؟','الأرجنتين',['ألمانيا','البرازيل','إيطاليا'],3],
+  ['من فاز بمونديال 2014؟','ألمانيا',['الأرجنتين','البرازيل','هولندا'],3],
+  ['هداف مونديال 2014؟','خاميس',['مولر','ميسي','نيمار'],5],
+  ['هداف مونديال 2018؟','هاري كين',['مبابي','غريزمان','لوكاكو'],4],
+  ['أول مونديال في أفريقيا؟','2010',['2006','2014','2002'],4],
+  ['أول مونديال في آسيا؟','2002',['2006','1994','2010'],4],
+  ['أول مونديال بالشرق الأوسط؟','2022',['2018','2010','2026'],3],
+  ['من صاحب هدف «يد الله»؟','مارادونا',['بيليه','زيدان','ميسي'],4],
+  ['من رأس برأسه في نهائي 2006؟','زيدان',['هنري','تيري','فييرا'],5],
+  ['من فاز بمونديال 1998؟','فرنسا',['البرازيل','إيطاليا','ألمانيا'],3],
+  ['هداف مونديال 1958؟','فونتين',['بيليه','بوتباس','مولر'],6],
+  ['هداف مونديال 2002؟','رونالدو',['كلوزه','ريفالدو','رونالدينيو'],3],
+  ['هداف مونديال 2010؟','توماس مولر',['فيا','سنيدر','فورلان'],4],
+  ['هداف مونديال 2006؟','كلوزه',['هنري','رونالدو','توتي'],4],
+  ['أكثر منتخب مشاركة بالمونديال؟','البرازيل',['ألمانيا','إيطاليا','الأرجنتين'],3],
+  ['أكثر منتخب فوزاً بالمونديال؟','البرازيل',['ألمانيا','إيطاليا','الأرجنتين'],2],
+  ['من فاز بمونديال 2002؟','البرازيل',['ألمانيا','تركيا','كوريا'],2],
+  ['من فاز بمونديال 2010؟','إسبانيا',['هولندا','ألمانيا','أوروغواي'],3],
+  ['من فاز بمونديال 2018؟','فرنسا',['كرواتيا','بلجيكا','إنجلترا'],3],
+  ['هداف مونديال 1998؟','شوكر',['رونالدو','بيتي','زيدان'],6],
+  ['هداف مونديال 1994؟','سالينكو',['روماريو','باجيو','ستويتشكوف'],6],
+  ['هداف مونديال 1990؟','سكيلاتشي',['مارادونا','كلينسمان','ماتيوس'],6],
+  ['هداف مونديال 1986؟','لينيكر',['مارادونا','بوخفالد','بلاتيني'],6],
+  ['من سجل ثلاثية في نهائي 2022؟','مبابي',['ميسي','دي ماريا','غريزمان'],3],
+  ['من فاز بأول كأس أفريقية؟','مصر',['السودان','إثيوبيا','غانا'],7],
+  ['أكثر منتخب فوزاً بكأس أفريقيا؟','مصر',['الكاميرون','غانا','نيجيريا'],3],
+  ['كم مرة فازت مصر بأمم أفريقيا؟','7',['5','6','8'],4],
+  ['من فاز بأمم أفريقيا 2019؟','الجزائر',['السنغال','نيجيريا','مصر'],4],
+  ['من فاز بأمم أفريقيا 2021؟','السنغال',['مصر','الجزائر','الكاميرون'],4],
+  ['من فاز بأمم أفريقيا 2023؟','ساحل العاج',['نيجيريا','مصر','السنغال'],5],
+  ['من فاز بيورو 2024؟','إسبانيا',['إنجلترا','فرنسا','ألمانيا'],4],
+  ['من فاز بيورو 2020؟','إيطاليا',['إنجلترا','إسبانيا','فرنسا'],4],
+  ['من فاز بيورو 2016؟','البرتغال',['فرنسا','ألمانيا','إسبانيا'],4],
+  ['أكثر فوزاً بكوبا أمريكا؟','أوروغواي',['الأرجنتين','البرازيل','تشيلي'],5],
+  ['من فاز بكوبا أمريكا 2024؟','الأرجنتين',['أوروغواي','كولومبيا','البرازيل'],4],
+  ['من فاز بكوبا أمريكا 2021؟','الأرجنتين',['البرازيل','كولومبيا','أوروغواي'],3],
+  ['من فاز بأبطال أوروبا 2024؟','ريال مدريد',['دورتموند','بايرن','سيتي'],3],
+  ['من فاز بأبطال أوروبا 2023؟','مان سيتي',['إنتر','ريال','بايرن'],3],
+  ['من فاز بأبطال أوروبا 2021؟','تشيلسي',['سيتي','ريال','بايرن'],4],
+  ['من فاز بأبطال أوروبا 2020؟','بايرن',['باريس','ريال','ليفربول'],4],
+  ['من درّب برشلونة 2009؟','غوارديولا',['إنريكي','فالفيردي','ريجيكامب'],5],
+  ['ملعب ريال مدريد؟','سانتياغو برنابيو',['كامب نو','أنفيلد','أليانز'],2],
+  ['ملعب برشلونة؟','كامب نو',['برنابيو','سان سيرو','أولد ترافورد'],2],
+  ['ملعب ليفربول؟','أنفيلد',['غوديسون','الاتحاد','سان سيرو'],2],
+  ['ملعب مان يونايتد؟','أولد ترافورد',['الاتحاد','أنفيلد','سان سيرو'],2],
+  ['ملعب بايرن؟','أليانز أرينا',['سيجنال إيدونا','برنابيو','سان سيرو'],3],
+  ['ملعب ميلان؟','سان سيرو',['أليانز','البرنابيو','كامب نو'],3],
+  ['ملعب الأهلي؟','القاهرة الدولي',['السلام','برج العرب','الدفاع الجوي'],5],
+  ['كم لاعباً في فريق كرة القدم؟','11',['10','12','9'],1],
+  ['مدة المباراة؟','90 دقيقة',['80','100','120'],1],
+  ['كم شوطاً؟','2',['1','3','4'],1],
+  ['متى يُحتسب التسلل؟','عند تمركز اللاعب خلف آخر مدافع',['عند اللمس','دائماً','عند الركل'],4],
+  ['أول مونديال في 1930 أقيم في؟','أوروغواي',['البرازيل','الأرجنتين','إيطاليا'],3],
+  ['أكثر مونديال استضافة؟','المكسيك',['البرازيل','ألمانيا','إيطاليا'],5],
+  ['من أول من رفع كأس العالم 3 مرات؟','بيليه',['مارادونا','زيدان','كافو'],4],
+  ['أكثر لاعب مشاركة بالمونديال؟','ميسي',['رونالدو','كلوزه','بوفون'],4],
+  ['من فاز بأبطال أوروبا 2005 بعد ريمونتادا؟','ليفربول',['ميلان','ريال','يوفي'],4],
+  ['من فاز بأبطال أوروبا 1999 بريمونتادا؟','مان يونايتد',['بايرن','ريال','برشا'],5],
+  ['الفريق الذي فاز بالدوري الإنجليزي 2024؟','مان سيتي',['أرسنال','ليفربول','تشيلسي'],3],
+  ['الفريق الذي فاز بالدوري الإسباني 2024؟','ريال مدريد',['برشلونة','أتلتيكو','إشبيلية'],3],
+  ['الفريق الذي فاز بالدوري الإيطالي 2024؟','إنتر',['ميلان','يوفي','نابولي'],4],
+  ['من فاز بالدوري الألماني 2024؟','بايرن ليفركوزن',['بايرن ميونخ','دورتموند','لايبزيغ'],4],
+  ['من فاز بالدوري الفرنسي 2024؟','باريس سان جيرمان',['موناكو','مارسيليا','ليون'],3],
+  ['نادي «الشياطين الحمر»؟','مان يونايتد',['ليفربول','أرسنال','تشيلسي'],3],
+  ['نادي «البلوغرانا»؟','برشلونة',['ريال','أتلتيكو','إشبيلية'],3],
+  ['نادي «الملكي»؟','ريال مدريد',['برشلونة','بايرن','يوفي'],2],
+  ['نادي «البيانكونيري»؟','يوفنتوس',['ميلان','إنتر','روما'],4],
+  ['نادي «الريدز»؟','ليفربول',['يونايتد','أرسنال','توتنهام'],3],
+  ['الهداف التاريخي للدوري الإنجليزي؟','شيرر',['هنري','رونالدو','كول'],6],
+  ['من فاز بالكرة الذهبية 2024؟','رودري',['فينيسيوس','بيلينغهام','كاين'],3],
+  ['من فاز بالكرة الذهبية 2023؟','ميسي',['هالاند','مبابي','كاين'],2],
+  ['من فاز بالكرة الذهبية 2022؟','بنزيما',['ميسي','مبابي','ليفا'],3],
+  ['من فاز بالكرة الذهبية 2018؟','مودريتش',['رونالدو','غريزمان','مبابي'],4],
+  ['من سجل 91 هدفاً في سنة؟','ميسي',['رونالدو','ليفا','مولر'],4],
+  ['من أفضل لاعب في مونديال 2022؟','ميسي',['مبابي','مودريتش','غريزمان'],2],
+  ['من أفضل لاعب في مونديال 2018؟','مودريتش',['غريزمان','مبابي','كاين'],4],
+  ['من أفضل لاعب في مونديال 2014؟','ميسي',['مولر','روبين','نيمار'],4],
+  ['من أفضل لاعب في مونديال 2010؟','فورلان',['فيا','سنيدر','إنييستا'],6],
+  ['هدف «يد الله» في مونديال؟','1986',['1990','1982','1994'],4],
+  ['ميسي فاز بمونديال؟','2022',['2018','2014','2010'],2],
+  ['رونالدو فاز بيورو؟','2016',['2012','2008','2020'],3],
+  ['رونالدينيو فاز بالكرة الذهبية؟','2005',['2004','2006','2007'],5],
+  ['من صاحب «ظاهرة المونديال» 1998؟','رونالدو',['زيدان','هنري','ريفالدو'],3],
+  ['أكثر لاعب سجل في مونديال واحد؟','فونتين',['مولر','رونالدو','ميسي'],6],
+  ['من فاز بمونديال 1970؟','البرازيل',['إيطاليا','ألمانيا','أوروغواي'],3],
+  ['من فاز بمونديال 1958؟','البرازيل',['السويد','ألمانيا','فرنسا'],4],
+  ['من فاز بمونديال 1966؟','إنجلترا',['ألمانيا','البرازيل','البرتغال'],4],
+  ['من فاز بمونديال 1934؟','إيطاليا',['تشيكوسلوفاكيا','ألمانيا','النمسا'],6],
+  ['من فاز بمونديال 1938؟','إيطاليا',['المجر','البرازيل','السويد'],6],
+  ['من فاز بمونديال 1954؟','ألمانيا الغربية',['المجر','النمسا','أوروغواي'],6],
+  ['من فاز بمونديال 1974؟','ألمانيا الغربية',['هولندا','البرازيل','بولندا'],5],
+  ['من فاز بمونديال 1978؟','الأرجنتين',['هولندا','البرازيل','إيطاليا'],5],
+  ['من فاز بمونديال 1982؟','إيطاليا',['ألمانيا الغربية','بولندا','فرنسا'],5],
+  ['من فاز بمونديال 1990؟','ألمانيا الغربية',['الأرجنتين','إيطاليا','إنجلترا'],4],
+  ['من فاز بمونديال 1994؟','البرازيل',['إيطاليا','السويد','بلغاريا'],4],
+  ['من فاز بمونديال 2006؟','إيطاليا',['فرنسا','ألمانيا','البرتغال'],3],
+  ['من فاز بيورو 2000؟','فرنسا',['إيطاليا','هولندا','البرتغال'],5],
+  ['من فاز بيورو 2004؟','اليونان',['البرتغال','التشيك','هولندا'],6],
+  ['من فاز بيورو 2008؟','إسبانيا',['ألمانيا','روسيا','تركيا'],4],
+  ['من فاز بيورو 2012؟','إسبانيا',['إيطاليا','ألمانيا','البرتغال'],4],
+  ['من فاز بكأس آسيا 2023؟','قطر',['الأردن','كوريا','اليابان'],5],
+  ['من فاز بكأس آسيا 2019؟','قطر',['اليابان','إيران','كوريا'],4],
+  ['كأس الخليج 2024 في؟','الكويت',['قطر','السعودية','البحرين'],6]
+];
+
+/* ============ HELPERS ============ */
+function wrongNums(ans, spread){
+  const out=[], used=new Set([ans]); let guard=0; const sp=Math.max(1,Math.round(spread));
+  while(out.length<3 && guard++<300){
+    const v = Math.round((ans + ri(1,sp)*(Math.random()<.5?-1:1))*100)/100;
+    if(used.has(v)||(ans>0&&v<=0)) continue;
+    used.add(v); out.push(v);
+  }
+  let k=1;
+  while(out.length<3){ const v=Math.round((ans+k*3)*100)/100; if(!used.has(v)){used.add(v);out.push(v);} k++; }
+  return out;
+}
+function pickWrongs(correct, pool){
+  const filtered = pool.filter(x => x !== correct);
+  return shuffle([...new Set(filtered)]).slice(0,3);
+}
+
+/* ============ MATH GENS ============ */
+const MATH_GENS = [
+  d => { const m=Math.pow(10,Math.min(3,Math.ceil(d/2.5))); const a=ri(m,m*9),b=ri(m,m*9); return {q:`ما ناتج ${a} + ${b} ؟`, a:a+b, w:wrongNums(a+b,Math.max(9,Math.floor(m/3))) }; },
+  d => { const m=Math.pow(10,Math.min(3,Math.ceil(d/2.5))); const a=ri(m*3,m*9),b=ri(m,m*2); return {q:`ما ناتج ${a} − ${b} ؟`, a:a-b, w:wrongNums(a-b,Math.max(9,Math.floor(m/3))) }; },
+  d => { const hi=d<=3?9:d<=6?15:60; const a=ri(2,hi),b=ri(2,hi); return {q:`ما ناتج ${a} × ${b} ؟`, a:a*b, w:wrongNums(a*b,Math.max(5,Math.floor(a*b/8))) }; },
+  d => { const b=ri(2,d<=4?9:15), q=ri(2,d<=4?9:20); return {q:`ما ناتج ${b*q} ÷ ${b} ؟`, a:q, w:wrongNums(q,Math.max(3,Math.floor(q/3))) }; },
+  d => { const p=pick([5,10,20,25,50]),n=ri(2,20)*20; const r=p*n/100; return {q:`كم يساوي ${p}% من ${n} ؟`, a:r, w:wrongNums(r,Math.max(4,Math.floor(r/3))) }; },
+  d => { const st=ri(2,9),df=ri(2,d<=4?5:12),arr=[st]; for(let i=1;i<4;i++)arr.push(arr[i-1]+df); return {q:`أكمل: ${arr.join('، ')}، ؟`, a:arr[3]+df, w:wrongNums(arr[3]+df,df+3) }; },
+  d => { const n=ri(4,d<=5?15:30); return {q:`مربع العدد ${n}؟`, a:n*n, w:wrongNums(n*n,Math.max(5,n*2)) }; },
+  d => { const w=ri(3,15),h=ri(3,15); return {q:`محيط مستطيل ${w}×${h}؟`, a:2*(w+h), w:wrongNums(2*(w+h),10) }; },
+  d => { const a=ri(2,9),x=ri(2,d<=5?10:25),b=ri(1,20); return {q:`حل: ${a}س + ${b} = ${a*x+b}`, a:x, w:wrongNums(x,6) }; },
+  d => { const n=ri(4,d<=6?15:25); return {q:`جذر ${n*n}؟`, a:n, w:wrongNums(n,4) }; },
+  d => { const b=pick([2,3,4,5,6,8]),a=ri(1,b-1),n=b*ri(4,d<=5?10:20); const r=a*n/b; return {q:`${a}/${b} من ${n}؟`, a:r, w:wrongNums(r,Math.max(4,Math.floor(n/5))) }; },
+  d => { const w=ri(3,d<=5?12:25),h=ri(3,d<=5?12:25); return {q:`مساحة مستطيل ${w}×${h}؟`, a:w*h, w:wrongNums(w*h,15) }; },
+  d => { const v=ri(2,12)*10,t=ri(2,8); return {q:`سرعة ${v} كم/س، مسافة ${t} ساعات؟`, a:v*t, w:wrongNums(v*t,Math.max(10,Math.floor(v*t/6))) }; },
+  d => { const e=ri(3,d<=7?8:12); return {q:`2^${e}؟`, a:Math.pow(2,e), w:wrongNums(Math.pow(2,e),Math.floor(Math.pow(2,e)/3)) }; },
+  d => { const n=ri(2,10)*10,p=pick([10,20,25,50]); const r=n*(100+p)/100; return {q:`${n} + ${p}% = ؟`, a:r, w:wrongNums(r,Math.max(5,Math.floor(r/8))) }; },
+  d => { const b=ri(3,9),q=ri(2,9),r=ri(0,b-1),a=b*q+r; const w=[]; for(let i=0;i<b;i++)if(i!==r)w.push(i); return {q:`باقي قسمة ${a} على ${b}؟`, a:r, w:shuffle(w).slice(0,3) }; },
+  d => { const b=pick([2,3,10]),e=ri(2,4),v=Math.pow(b,e); return {q:`log_${b}(${v})؟`, a:e, w:wrongNums(e,3) }; },
+  d => { const n=ri(4,7); return {q:`اختيار شخصين من ${n}؟`, a:n*(n-1)/2, w:wrongNums(n*(n-1)/2,Math.max(3,Math.floor(n*(n-1)/2/3))) }; }
+];
+
+/* ============ FB GENS ============ */
+const FB_GENS = [
+  () => { const wc=pick(WC); return {q:`من فاز بكأس العالم ${wc.y}؟`, a:wc.ch, w:pickWrongs(wc.ch, WC.map(x=>x.ch)), c:'football', d:3}; },
+  () => { const wc=pick(WC); return {q:`في أي دولة أُقيم مونديال ${wc.y}؟`, a:wc.host, w:pickWrongs(wc.host, WC.map(x=>x.host)), c:'football', d:3}; },
+  () => { const wc=pick(WC); return {q:`من هداف مونديال ${wc.y}؟`, a:wc.top, w:pickWrongs(wc.top, WC.map(x=>x.top)), c:'football', d:4}; },
+  () => { const wc=pick(WC); return {q:`من حلّ ثانياً في مونديال ${wc.y}؟`, a:wc.ru, w:pickWrongs(wc.ru, WC.map(x=>x.ru)), c:'football', d:4}; },
+  () => { const y=pick(Object.keys(CL)); return {q:`من فاز بدوري أبطال أوروبا ${y}؟`, a:CL[y], w:pickWrongs(CL[y], Object.values(CL)), c:'football', d:4}; },
+  () => { const y=pick(Object.keys(BALLON)); return {q:`من فاز بالكرة الذهبية ${y}؟`, a:BALLON[y], w:pickWrongs(BALLON[y], Object.values(BALLON)), c:'football', d:4}; },
+  () => { const y=pick(Object.keys(AFCON)); return {q:`من فاز بكأس أمم أفريقيا ${y}؟`, a:AFCON[y], w:pickWrongs(AFCON[y], Object.values(AFCON)), c:'football', d:5}; },
+  () => { const y=pick(Object.keys(EURO)); return {q:`من فاز بيورو ${y}؟`, a:EURO[y], w:pickWrongs(EURO[y], Object.values(EURO)), c:'football', d:5}; }
+];
+
+function genCountry(){
+  const [country, capital] = pick(COUNTRIES);
+  const wrongs = shuffle(COUNTRIES.filter(c=>c[1]!==capital).map(c=>c[1])).slice(0,3);
+  return {q:`ما عاصمة ${country}؟`, a:capital, w:wrongs, c:'culture', d:2};
+}
+
+function buildFromBank(bank, n, diff){
+  const pool = bank.map(([q,a,w,d]) => ({q,a,w,d}));
+  const scored = pool.map(x => ({x, s:Math.abs(x.d-diff)+Math.random()*3}));
+  scored.sort((a,b)=>a.s-b.s);
+  return scored.slice(0, Math.min(n, pool.length)).map(o => o.x);
+}
+
+function buildQuestions(cat, level){
+  const total = 20;
+  const out = [];
+  const diff = level;
+  const pushQ = (item, catKey) => {
+    const opts = shuffle([item.a, ...item.w.slice(0,3)]);
+    out.push({ q:item.q, o:opts, a:opts.indexOf(item.a), c:catKey || item.c || cat, d:item.d || diff });
+  };
+
+  if(cat === 'math'){
+    const gens = shuffle([...MATH_GENS, ...MATH_GENS]);
+    gens.slice(0, total - 4).forEach(g => pushQ(g(diff), 'math'));
+    buildFromBank(BANK_MATH, 4, diff).forEach(b => pushQ(b, 'math'));
+  } else if(cat === 'football'){
+    const fromBank = buildFromBank(BANK_FOOTBALL, Math.round(total*0.6), diff);
+    fromBank.forEach(b => pushQ(b, 'football'));
+    const gens = shuffle([...FB_GENS, ...FB_GENS, ...FB_GENS]);
+    const need = total - fromBank.length;
+    for(let i=0;i<need;i++) pushQ(gens[i](), 'football');
+  } else if(cat === 'culture'){
+    const fromBank = buildFromBank(BANK_CULTURE, Math.round(total*0.6), diff);
+    fromBank.forEach(b => pushQ(b, 'culture'));
+    const need = total - fromBank.length;
+    for(let i=0;i<need;i++) pushQ(genCountry(), 'culture');
+  } else if(cat === 'art'){
+    buildFromBank(BANK_ART, total, diff).forEach(b => pushQ(b, 'art'));
+  } else if(cat === 'science'){
+    buildFromBank(BANK_SCIENCE, total, diff).forEach(b => pushQ(b, 'science'));
+  } else if(cat === 'mixed'){
+    const cats = ['math','culture','art','science','football'];
+    for(let i=0;i<total;i++){
+      const c = pick(cats);
+      if(c === 'math'){
+        pushQ(pick(MATH_GENS)(diff), 'math');
+      } else if(c === 'football'){
+        if(Math.random()<0.5){
+          const b = buildFromBank(BANK_FOOTBALL, 1, diff)[0];
+          if(b) pushQ(b, 'football');
+        } else pushQ(pick(FB_GENS)(), 'football');
+      } else if(c === 'culture'){
+        if(Math.random()<0.5) pushQ(genCountry(), 'culture');
+        else { const b = buildFromBank(BANK_CULTURE, 1, diff)[0]; if(b) pushQ(b, 'culture'); }
+      } else if(c === 'art'){
+        const b = buildFromBank(BANK_ART, 1, diff)[0]; if(b) pushQ(b, 'art');
+      } else {
+        const b = buildFromBank(BANK_SCIENCE, 1, diff)[0]; if(b) pushQ(b, 'science');
+      }
+    }
+  }
+  return shuffle(out).slice(0, total);
+}
+
+/* ============ SAVE ============ */
+const SAVE_KEY = 'jumjum_v3';
+let save = {
+  unlocked: {}, best: {}, sound: true,
+  playerName: '',
+  stats: { totalStars: 0, totalGames: 0, bestStreak: 0 }
+};
+try {
+  const r = localStorage.getItem(SAVE_KEY);
+  if(r) save = Object.assign(save, JSON.parse(r));
+} catch(e){}
+function persist(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify(save)); }catch(e){} }
+
+/* ============ SOUND ============ */
+let audioCtx = null;
+function tone(freq, dur, type='sine', vol=.05){
+  if(!save.sound) return;
+  try{
+    if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if(audioCtx.state === 'suspended') audioCtx.resume();
+    const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+    o.type = type; o.frequency.value = freq;
+    g.gain.setValueAtTime(vol, audioCtx.currentTime);
+    g.gain.exponentialRampToValueAtTime(.0001, audioCtx.currentTime + dur);
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start(); o.stop(audioCtx.currentTime + dur);
+  }catch(e){}
+}
+const sfxOk = () => { tone(880,.12); setTimeout(()=>tone(1320,.16),90); };
+const sfxNo = () => tone(220,.22,'sawtooth',.05);
+const sfxTap = () => tone(660,.05,'square',.03);
+const sfxWin = () => [523,659,784,1047].forEach((f,i)=>setTimeout(()=>tone(f,.2,'sine',.055), i*110));
+const sfxType = () => tone(1200,.02,'sine',.02);
+
+/* ============ STATE ============ */
+const state = {
+  cat:'math', level:1, mode:'story', qs:[], idx:0,
+  score:0, correct:0, streak:0, bestStreak:0,
+  hearts:3, answered:false, timeLeft:30, timerId:null,
+  powerups:{ fifty:1, freeze:1, skip:1 },
+  frozen:false, startTime:0
+};
+const TIME_LIMIT = 30;
+
+/* ============ SCREENS ============ */
+function show(id){
+  $$('.screen').forEach(s => s.classList.toggle('active', s.id === id));
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+/* ============ SPLASH ============ */
+let splashInitDone = false;
+
+function createParticles(){
+  const container = $('#splashParticles');
+  if(!container) return;
+  const colors = ['#a855f7', '#38bdf8', '#f472b6', '#34d399', '#fbbf24'];
+  for(let i=0; i<24; i++){
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.style.left = Math.random() * 100 + '%';
+    p.style.top = '100%';
+    p.style.background = pick(colors);
+    p.style.boxShadow = `0 0 8px ${p.style.background}`;
+    p.style.animationDelay = Math.random() * 8 + 's';
+    p.style.animationDuration = (6 + Math.random() * 4) + 's';
+    p.style.width = p.style.height = (2 + Math.random() * 3) + 'px';
+    container.appendChild(p);
+  }
+}
+
+function typeText(text, el, speed = 45){
+  return new Promise(resolve => {
+    let i = 0;
+    el.textContent = '';
+    el.classList.add('typewriter');
+    const interval = setInterval(() => {
+      el.textContent += text[i];
+      i++;
+      if(i % 3 === 0) sfxType();
+      if(i >= text.length){
+        clearInterval(interval);
+        el.classList.remove('typewriter');
+        resolve();
+      }
+    }, speed);
+  });
+}
+
+async function initSplash(){
+  if(splashInitDone) return;
+  splashInitDone = true;
+
+  createParticles();
+
+  const welcomeEl = $('#typeText');
+  const inputWrap = $('#nameInputWrap');
+  const btnLabel = $('#btnEnterLabel');
+  const nameInput = $('#playerName');
+
+  const savedName = save.playerName || '';
+
+  if(savedName){
+    state.playerName = savedName;
+    inputWrap.style.display = 'none';
+    btnLabel.textContent = 'متابعة الرحلة';
+    await new Promise(r => setTimeout(r, 400));
+    await typeText(`أهلاً بعودتك يا ${savedName}`, welcomeEl, 35);
+  } else {
+    await new Promise(r => setTimeout(r, 400));
+    await typeText('أهلاً بك في عالم الذكاء', welcomeEl, 45);
+    inputWrap.style.display = 'block';
+    setTimeout(() => { try{ nameInput.focus(); }catch(e){} }, 200);
+  }
+}
+
+function enterGame(){
+  const btn = $('#btnEnter');
+  btn.classList.add('loading');
+
+  const inputVal = ($('#playerName').value || '').trim();
+  const finalName = inputVal || save.playerName || 'بطل';
+  save.playerName = finalName;
+  persist();
+
+  sfxOk();
+  vibrate(30);
+
+  const splash = $('.splash');
+  splash.classList.add('splash-out');
+
+  setTimeout(() => {
+    renderHome();
+    show('scr-home');
+    setTimeout(updateHomeStats, 100);
+  }, 550);
+}
+
+/* ============ HOME RENDER ============ */
+function renderHome(){
+  const name = save.playerName || 'بطل';
+  const nameEl = $('#homeName');
+  if(nameEl) nameEl.textContent = name;
+
+  // sound button state
+  const soundBtn = $('#soundToggle');
+  if(soundBtn){
+    soundBtn.innerHTML = save.sound
+      ? '<i class="fas fa-volume-high"></i>'
+      : '<i class="fas fa-volume-xmark"></i>';
+    soundBtn.style.color = save.sound ? 'var(--accent)' : 'var(--dim)';
+  }
+
+  const grid = $('#catsGrid');
+  grid.innerHTML = '';
+  Object.entries(CATS).forEach(([key, c]) => {
+    if(key === 'mixed') return;
+    const card = document.createElement('button');
+    card.className = 'cat-card';
+    card.style.setProperty('--c', c.color);
+    const unlocked = (save.unlocked && save.unlocked[key]) || 1;
+    const pct = Math.min(100, unlocked / c.stages * 100);
+    card.innerHTML = `
+      <span class="cat-icon"><i class="fas ${c.faIcon}"></i></span>
+      <div class="cat-name">${c.name}</div>
+      <div class="cat-sub">${c.stages} ${key==='football'?'مستويات':'مراحل'}</div>
+      <div class="cat-prog"><i style="width:${pct}%"></i></div>
+    `;
+    card.addEventListener('click', () => {
+      sfxTap();
+      state.cat = key;
+      document.documentElement.style.setProperty('--accent', c.color);
+      renderStages();
+      show('scr-stages');
+    });
+    grid.appendChild(card);
+  });
+
+  const mixedCard = document.createElement('button');
+  mixedCard.className = 'cat-card';
+  mixedCard.style.setProperty('--c', CATS.mixed.color);
+  mixedCard.style.gridColumn = '1 / -1';
+  mixedCard.innerHTML = `
+    <span class="cat-icon"><i class="fas ${CATS.mixed.faIcon}"></i></span>
+    <div class="cat-name">الوضع المختلط</div>
+    <div class="cat-sub">كل الأقسام معاً · 10 مراحل</div>
+  `;
+  mixedCard.addEventListener('click', () => {
+    sfxTap();
+    state.cat = 'mixed';
+    document.documentElement.style.setProperty('--accent', CATS.mixed.color);
+    renderStages();
+    show('scr-stages');
+  });
+  grid.appendChild(mixedCard);
+
+  updateHomeStats();
+}
+
+function updateHomeStats(){
+  const stats = save.stats || {totalStars: 0, totalGames: 0, bestStreak: 0};
+  const setTxt = (id, val) => {
+    const el = document.getElementById(id);
+    if(el) el.textContent = val;
+  };
+  setTxt('statStars', stats.totalStars || 0);
+  setTxt('statStreak', stats.bestStreak || 0);
+  setTxt('statGames', stats.totalGames || 0);
+}
+
+/* ============ STAGES ============ */
+function renderStages(){
+  const cat = CATS[state.cat];
+  const grid = $('#stagesGrid');
+  const title = $('#stageTitle');
+  title.textContent = cat.name;
+  document.documentElement.style.setProperty('--accent', cat.color);
+  grid.innerHTML = '';
+
+  const isFootball = state.cat === 'football';
+  const nStages = cat.stages;
+  const unlocked = (save.unlocked && save.unlocked[state.cat]) || 1;
+
+  for(let i=1;i<=nStages;i++){
+    const locked = i > unlocked;
+    const best = (save.best && save.best[state.cat] && save.best[state.cat][i]) || 0;
+    const card = document.createElement('div');
+    card.className = 'stage-card' + (locked ? ' locked' : '');
+    const lbl = isFootball ? FOOTBALL_LEVELS[i-1] : (i<=3?'سهل':i<=6?'متوسط':i<=9?'صعب':'خبير');
+    card.innerHTML = `
+      <div class="stage-num ${locked?'locked':''}">
+        ${locked ? '<i class="fas fa-lock"></i>' : i}
+      </div>
+      <div class="stage-title">${isFootball ? lbl : 'المرحلة ' + i}</div>
+      <div class="stage-diff">${isFootball ? `المستوى ${i}` : lbl}</div>
+      <div class="stage-best">
+        ${best ? `<i class="fas fa-star"></i> ${best.toLocaleString('ar-EG')}` : '—'}
+      </div>
+    `;
+    if(!locked) card.addEventListener('click', () => { sfxTap(); startGame(state.cat, i, 'story'); });
+    grid.appendChild(card);
+  }
+}
+
+/* ============ START GAME ============ */
+function startGame(cat, level, mode){
+  state.cat = cat; state.level = level; state.mode = mode;
+  const catInfo = CATS[cat] || CATS.mixed;
+  document.documentElement.style.setProperty('--accent', catInfo.color);
+
+  if(mode === 'daily'){
+    state.qs = buildQuestions('mixed', 5);
+    state.level = 5;
+  } else if(mode === 'survival'){
+    state.qs = buildQuestions(cat, Math.max(3, level));
+  } else {
+    state.qs = buildQuestions(cat, level);
+  }
+
+  state.idx = 0;
+  state.score = 0;
+  state.correct = 0;
+  state.streak = 0;
+  state.bestStreak = 0;
+  state.hearts = 3;
+  state.startTime = Date.now();
+  state.powerups = { fifty:1, freeze:1, skip:1 };
+  state.frozen = false;
+
+  $('#qTot').textContent = state.mode === 'survival' ? '∞' : state.qs.length;
+  show('scr-quiz');
+  renderQuestion();
+}
+
+/* ============ RENDER QUESTION ============ */
+function renderQuestion(){
+  if(state.idx >= state.qs.length){
+    if(state.mode === 'survival'){
+      const more = buildQuestions(state.cat, Math.max(3, state.level));
+      state.qs = state.qs.concat(more);
+    } else { finish(); return; }
+  }
+
+  state.answered = false;
+  state.timeLeft = TIME_LIMIT;
+  state.frozen = false;
+
+  const q = state.qs[state.idx];
+  const cat = CATS[q.c] || CATS.mixed;
+
+  $('#qNum').textContent = state.idx + 1;
+  const progPct = state.mode === 'survival' ? Math.min(100, state.idx/20*100) : (state.idx/state.qs.length*100);
+  $('#qProg').style.width = progPct + '%';
+
+  const chip = $('#qCat');
+  chip.style.color = cat.color;
+  chip.style.borderColor = cat.color + '66';
+  chip.innerHTML = `<i class="fas ${cat.faIcon}"></i><span>${cat.name}</span>`;
+
+  const hearts = $('#qHearts');
+  hearts.innerHTML = '';
+  for(let i=0;i<3;i++){
+    const h = document.createElement('span');
+    h.className = 'heart' + (i < state.hearts ? ' on' : '');
+    h.innerHTML = '<i class="fas fa-heart"></i>';
+    hearts.appendChild(h);
+  }
+
+  const scoreEl = $('#qScore');
+  scoreEl.innerHTML = `<i class="fas fa-star"></i><span>${state.score.toLocaleString('ar-EG')}</span>`;
+
+  $('#qText').textContent = q.q;
+
+  const box = $('#qOpts');
+  box.innerHTML = '';
+  const letters = ['أ','ب','ج','د'];
+  q.o.forEach((opt, i) => {
+    const b = document.createElement('button');
+    b.className = 'q-opt';
+    b.innerHTML = `<span class="ltr">${letters[i]}</span><span>${opt}</span>`;
+    b.addEventListener('click', () => answer(i));
+    box.appendChild(b);
+  });
+
+  $$('.pu').forEach(p => { p.disabled = state.powerups[p.dataset.pu] <= 0; });
+
+  startTimer();
+}
+
+/* ============ TIMER ============ */
+function startTimer(){
+  stopTimer();
+  const fill = $('#qTimerFill');
+  const num = $('#qTimerNum');
+  const start = performance.now();
+
+  state.timerId = setInterval(() => {
+    if(state.answered || state.frozen) return;
+    const elapsed = (performance.now() - start) / 1000;
+    const left = Math.max(0, TIME_LIMIT - elapsed);
+    state.timeLeft = left;
+    const pct = left / TIME_LIMIT * 100;
+    fill.style.width = pct + '%';
+    fill.style.background = pct > 50 ? 'var(--ok)' : pct > 22 ? 'var(--warn)' : 'var(--bad)';
+    num.textContent = Math.ceil(left);
+    if(left <= 0) handleTimeout();
+  }, 100);
+}
+function stopTimer(){
+  if(state.timerId){ clearInterval(state.timerId); state.timerId = null; }
+}
+
+/* ============ ANSWER ============ */
+function answer(selected){
+  if(state.answered) return;
+  state.answered = true;
+  stopTimer();
+
+  const q = state.qs[state.idx];
+  const correct = q.a;
+  const isRight = selected === correct;
+
+  $$('.q-opt').forEach((el, i) => {
+    el.classList.add('dis');
+    if(i === correct) el.classList.add('ok');
+    else if(i === selected) el.classList.add('no');
+  });
+
+  if(isRight){
+    state.correct++;
+    state.streak++;
+    state.bestStreak = Math.max(state.bestStreak, state.streak);
+    const timeBonus = Math.round(state.timeLeft * 2);
+    const streakBonus = Math.min(state.streak, 10) * 10;
+    state.score += 100 + timeBonus + streakBonus;
+    sfxOk();
+    vibrate(30);
+  } else {
+    state.streak = 0;
+    state.hearts--;
+    sfxNo();
+    vibrate([40,30,40]);
+  }
+
+  $('#qScore').innerHTML = `<i class="fas fa-star"></i><span>${state.score.toLocaleString('ar-EG')}</span>`;
+
+  const hearts = $('#qHearts');
+  hearts.innerHTML = '';
+  for(let i=0;i<3;i++){
+    const h = document.createElement('span');
+    h.className = 'heart' + (i < state.hearts ? ' on' : '');
+    h.innerHTML = '<i class="fas fa-heart"></i>';
+    if(i === state.hearts && !isRight) h.classList.add('lose');
+    hearts.appendChild(h);
+  }
+
+  if(state.hearts <= 0){ setTimeout(() => finish(true), 900); return; }
+  setTimeout(nextQuestion, 1000);
+}
+
+function handleTimeout(){
+  if(state.answered) return;
+  state.answered = true;
+  stopTimer();
+
+  const q = state.qs[state.idx];
+  $$('.q-opt').forEach((el, i) => {
+    el.classList.add('dis');
+    if(i === q.a) el.classList.add('ok');
+  });
+
+  state.streak = 0;
+  state.hearts--;
+  sfxNo();
+  vibrate([40,30,40]);
+
+  const hearts = $('#qHearts');
+  hearts.innerHTML = '';
+  for(let i=0;i<3;i++){
+    const h = document.createElement('span');
+    h.className = 'heart' + (i < state.hearts ? ' on' : '');
+    h.innerHTML = '<i class="fas fa-heart"></i>';
+    if(i === state.hearts) h.classList.add('lose');
+    hearts.appendChild(h);
+  }
+
+  if(state.hearts <= 0){ setTimeout(() => finish(true), 900); return; }
+  setTimeout(nextQuestion, 1000);
+}
+
+function nextQuestion(){
+  state.idx++;
+  renderQuestion();
+}
+
+/* ============ POWER-UPS ============ */
+$$('.pu').forEach(btn => {
+  btn.addEventListener('click', () => {
+    if(state.answered) return;
+    const t = btn.dataset.pu;
+    if(state.powerups[t] <= 0) return;
+    state.powerups[t]--;
+    btn.disabled = true;
+    sfxTap();
+
+    const q = state.qs[state.idx];
+    if(t === 'fifty'){
+      const wrongs = [];
+      $$('.q-opt').forEach((el, i) => { if(i !== q.a) wrongs.push(el); });
+      shuffle(wrongs).slice(0,2).forEach(el => el.classList.add('gone'));
+    } else if(t === 'freeze'){
+      state.frozen = true;
+      setTimeout(() => { state.frozen = false; }, 10000);
+    } else if(t === 'skip'){
+      state.answered = true;
+      stopTimer();
+      state.idx++;
+      setTimeout(() => renderQuestion(), 300);
+    }
+  });
+});
+
+/* ============ FINISH ============ */
+function finish(lost = false){
+  stopTimer();
+  const total = state.qs.length;
+  const answered = Math.min(state.idx + 1, total);
+  const acc = answered > 0 ? Math.round(state.correct / answered * 100) : 0;
+  const seconds = Math.round((Date.now() - state.startTime) / 1000);
+
+  let stars = 0;
+  if(!lost){
+    if(acc >= 90) stars = 3;
+    else if(acc >= 70) stars = 2;
+    else if(acc >= 50) stars = 1;
+  }
+
+  $('#resStars').innerHTML = [1,2,3].map(i =>
+    `<i class="${i<=stars?'fas':'far'} fa-star" style="animation-delay:${i*0.12}s;color:${i<=stars?'var(--warn)':'rgba(255,255,255,.15)'}"></i>`
+  ).join('');
+
+  $('#resTitle').textContent = lost ? 'انتهت القلوب! 💔' :
+    acc >= 90 ? 'عبقري! 🏆' :
+    acc >= 70 ? 'أداء رائع! 🎯' :
+    acc >= 50 ? 'جيد، واصل! 💪' : 'تحتاج تدريب 📚';
+
+  $('#resScore').textContent = state.score.toLocaleString('ar-EG');
+  $('#resCorrect').textContent = state.correct + '/' + answered;
+  $('#resAcc').textContent = acc + '%';
+  $('#resStreak').textContent = state.bestStreak;
+  $('#resTime').textContent = seconds;
+
+  // Update global stats
+  if(!save.stats) save.stats = {totalStars:0, totalGames:0, bestStreak:0};
+  save.stats.totalStars = (save.stats.totalStars || 0) + stars;
+  save.stats.totalGames = (save.stats.totalGames || 0) + 1;
+  if(state.bestStreak > (save.stats.bestStreak || 0)) save.stats.bestStreak = state.bestStreak;
+
+  // Save progress
+  if(state.mode === 'story' && !lost){
+    if(!save.best[state.cat]) save.best[state.cat] = {};
+    const prev = save.best[state.cat][state.level] || 0;
+    if(state.score > prev) save.best[state.cat][state.level] = state.score;
+
+    const totalStages = CATS[state.cat].stages;
+    if(acc >= 60 && state.level >= (save.unlocked[state.cat]||1) && state.level < totalStages){
+      save.unlocked[state.cat] = state.level + 1;
+    }
+  }
+  persist();
+
+  const nextBtn = $('#btnNext');
+  const isMax = state.level >= CATS[state.cat].stages;
+  if(state.mode !== 'story' || isMax || lost || acc < 60){
+    nextBtn.style.display = 'none';
+  } else {
+    nextBtn.style.display = 'flex';
+  }
+
+  if(stars >= 2){ sfxWin(); launchConfetti(); }
+  show('scr-result');
+}
+
+/* ============ CONFETTI ============ */
+function launchConfetti(){
+  const icons = ['fa-star', 'fa-trophy', 'fa-crown', 'fa-gem', 'fa-fire', 'fa-bolt', 'fa-medal'];
+  const colors = ['#fbbf24', '#38bdf8', '#a855f7', '#f472b6', '#34d399', '#a3e635'];
+  for(let i=0; i<30; i++){
+    const el = document.createElement('div');
+    el.className = 'confetti';
+    el.innerHTML = `<i class="fas ${pick(icons)}" style="color:${pick(colors)}"></i>`;
+    el.style.left = Math.random() * 100 + '%';
+    el.style.animationDelay = (Math.random() * 0.6) + 's';
+    el.style.fontSize = (14 + Math.random() * 14) + 'px';
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 3500);
+  }
+}
+
+/* ============ EVENTS ============ */
+$('#btnEnter').addEventListener('click', enterGame);
+$('#playerName').addEventListener('keypress', e => { if(e.key === 'Enter') enterGame(); });
+
+// Splash logo interactive
+$('#splashLogo').addEventListener('click', () => {
+  sfxOk();
+  vibrate(20);
+  const el = $('#splashLogo');
+  el.style.animation = 'none';
+  void el.offsetWidth;
+  el.style.animation = 'logoEntrance .6s cubic-bezier(.2,1.2,.4,1), glowPulse 3s ease-in-out infinite';
+});
+
+// Home logo interactive
+$('#homeLogo').addEventListener('click', () => {
+  sfxOk();
+  vibrate(20);
+  const el = $('#homeLogo');
+  el.style.animation = 'none';
+  void el.offsetWidth;
+  el.style.animation = 'floatY 3.5s ease-in-out infinite';
+});
+
+// Edit name
+$('#editName').addEventListener('click', () => {
+  const newName = prompt('اسمك الجديد:', save.playerName || 'بطل');
+  if(newName && newName.trim()){
+    save.playerName = newName.trim();
+    persist();
+    renderHome();
+    sfxOk();
+  }
+});
+
+// Sound toggle
+$('#soundToggle').addEventListener('click', () => {
+  save.sound = !save.sound;
+  persist();
+  const btn = $('#soundToggle');
+  btn.innerHTML = save.sound
+    ? '<i class="fas fa-volume-high"></i>'
+    : '<i class="fas fa-volume-xmark"></i>';
+  btn.style.color = save.sound ? 'var(--accent)' : 'var(--dim)';
+  if(save.sound) sfxTap();
+});
+
+$('#btnNext').addEventListener('click', () => {
+  sfxTap();
+  startGame(state.cat, state.level + 1, 'story');
+});
+$('#btnRetry').addEventListener('click', () => {
+  sfxTap();
+  startGame(state.cat, state.level, state.mode);
+});
+$('#btnHome').addEventListener('click', () => {
+  sfxTap();
+  renderHome();
+  show('scr-home');
+});
+
+document.addEventListener('click', e => {
+  if(e.target.closest('[data-back]')){
+    sfxTap();
+    show('scr-home');
+  }
+  if(e.target.closest('[data-quit]')){
+    if(confirm('هل تريد الخروج؟ سيُفقد التقدم.')){
+      stopTimer();
+      show('scr-home');
+    }
+  }
+  if(e.target.closest('[data-reset]')){
+    if(confirm('إعادة تعيين كل تقدمك؟')){
+      save.unlocked = {}; save.best = {};
+      save.stats = {totalStars:0, totalGames:0, bestStreak:0};
+      persist();
+      renderHome();
+    }
+  }
+});
+
+$$('.mode-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    sfxTap();
+    const mode = btn.dataset.mode;
+    if(mode === 'about') show('scr-about');
+    else if(mode === 'daily') startGame('mixed', 5, 'daily');
+    else if(mode === 'survival') startGame('mixed', 3, 'survival');
+  });
+});
+
+// Keyboard shortcuts
+document.addEventListener('keydown', e => {
+  if(!$('#scr-quiz').classList.contains('active') || state.answered) return;
+  const map = {'1':0,'2':1,'3':2,'4':3};
+  if(e.key in map){
+    const opts = $$('.q-opt');
+    if(opts[map[e.key]]) opts[map[e.key]].click();
+  }
+});
+
+// Pause timer when hidden
+document.addEventListener('visibilitychange', () => {
+  if(document.hidden && state.timerId){ stopTimer(); }
+  else if(!document.hidden && $('#scr-quiz').classList.contains('active') && !state.answered){
+    startTimer();
+  }
+});
+
+/* ============ INIT ============ */
+document.documentElement.style.setProperty('--accent', CATS.mixed.color);
+initSplash();
+</script>
+</body>
+</html>
